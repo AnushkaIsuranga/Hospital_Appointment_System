@@ -2,6 +2,7 @@ package nibm.hdse241.hospitalappointmentsystem.dto;
 
 public class appointmentDTO {
     private int id;
+    private String patientIndex;
     private String patientName;
     private String doctorName;
     private String patientMobile;
@@ -19,6 +20,14 @@ public class appointmentDTO {
 
     public void setId(int id) {
         this.id = id;
+    }
+
+    public String getPatientIndex() {
+        return patientIndex;
+    }
+
+    public void setPatientIndex(String patientIndex) {
+        this.patientIndex = patientIndex;
     }
 
     public String getPatientName() {

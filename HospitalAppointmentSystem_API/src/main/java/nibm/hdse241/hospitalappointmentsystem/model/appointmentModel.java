@@ -2,6 +2,7 @@ package nibm.hdse241.hospitalappointmentsystem.model;
 
 public class appointmentModel {
     private int id;
+    private String patientIndex;
     private String patientName;
     private String doctorName;
     private String patientMobile;

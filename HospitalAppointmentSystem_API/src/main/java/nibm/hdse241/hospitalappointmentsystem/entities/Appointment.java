@@ -8,6 +8,7 @@ public class Appointment {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private int id;
+    private String patientIndex;
     private String patientName;
     private String doctorName;
     private String patientMobile;
@@ -23,6 +24,14 @@ public class Appointment {
         return id;
     }
 
+    public String getPatientIndex() {
+        return patientIndex;
+    }
+
+    public void setPatientIndex(String patientIndex) {
+        this.patientIndex = patientIndex;
+    }
+
     public void setId(int id) {
         this.id = id;
     }
@@ -33,6 +42,14 @@ public class Appointment {
 
     public String getPatientMobile(String patientMobile) {
         return this.patientMobile;
+    }
+
+    public String getPatientMobile() {
+        return patientMobile;
+    }
+
+    public String getPatientEmail() {
+        return patientEmail;
     }
 
     public void setPatientMobile(String patientMobile) {
