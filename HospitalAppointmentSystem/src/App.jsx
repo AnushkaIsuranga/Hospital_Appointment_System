@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import axios from 'axios';
-import './tailwind.css'; 
+import './app.css'; 
+
 const SimpleForm = () => {
   const [formData, setFormData] = useState({
     name: '',
@@ -71,14 +72,14 @@ const SimpleForm = () => {
         </label>
       </div>
       <div className="mb-4">
-        <label className="block text-aqua font-semibold mb-2">
+        <label className="block text-aqua font-semibold mb-2 dropdown">
           Preferred Time Period:
           <select
             name="timePeriod"
             value={formData.timePeriod}
             onChange={handleChange}
             required
-            className="w-full p-2 mt-1 border border-tango rounded-md focus-ring-tango"
+            className="w-full p-2 mt-1 border border-tango rounded-md focus-ring-tango hover-scale-up transition-transform"
           >
             <option value="8-11am">8-11am</option>
             <option value="10-1pm">10-1pm</option>
@@ -88,7 +89,10 @@ const SimpleForm = () => {
           </select>
         </label>
       </div>
-      <button type="submit" className="w-full py-2 bg-tango text-white font-semibold rounded-md hover:bg-tango-dark">
+      <button
+        type="submit"
+        className="w-full py-2 bg-tango text-white font-semibold rounded-md hover-bg-tango-dark hover-scale-up transition-transform focus-ring-tango"
+      >
         Submit
       </button>
     </form>

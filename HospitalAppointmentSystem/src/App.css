@@ -1,3 +1,4 @@
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
@@ -34,5 +35,39 @@
   .focus-ring-tango {
     @apply focus:outline-none focus:ring-2 focus:ring-tango;
   }
-}
 
+  /*sexy fx */
+  .transition-transform {
+    transition: transform 0.3s ease;
+  }
+
+  .hover-scale-up {
+    @apply transform scale-100;
+  }
+  
+  .hover-scale-up:hover {
+    @apply transform scale-105;
+  }
+
+  .hover-bg-tango-dark:hover {
+    background-color: #e65c32; 
+  }
+
+  .focus-border-aqua {
+    @apply focus:outline-none focus:border-aqua focus:ring-2 focus:ring-aqua;
+  }
+
+  /*same dropdown but cooler*/
+  .dropdown {
+    @apply relative inline-block w-full;
+  }
+
+  .dropdown-content {
+    @apply absolute left-0 mt-1 w-full bg-white border border-gray-300 rounded-lg shadow-lg z-10 transition-opacity opacity-0;
+  }
+
+  .dropdown:hover .dropdown-content,
+  .dropdown:focus-within .dropdown-content {
+    @apply opacity-100;
+  }
+}
