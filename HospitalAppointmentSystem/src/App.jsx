@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import axios from 'axios';
+import './app.css'; 
 
 const SimpleForm = () => {
   const [formData, setFormData] = useState({
@@ -98,7 +99,10 @@ const SimpleForm = () => {
           <option value="7-10pm">7-10pm</option>
         </select>
       </div>
-      <button type="submit" className="w-full py-2 bg-blue-500 text-white font-semibold rounded-md hover:bg-blue-600">
+      <button
+        type="submit"
+        className="w-full py-2 bg-blue-500 text-white font-semibold rounded-md hover:bg-blue-600"
+      >
         Submit
       </button>
     </form>
