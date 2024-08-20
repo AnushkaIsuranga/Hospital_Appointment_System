@@ -1,0 +1,27 @@
+.doctors {
+    padding: 50px 20px;
+    text-align: center;
+  }
+  
+  .doctor-list {
+    display: flex;
+    justify-content: space-around;
+    margin-top: 20px;
+  }
+  
+  .doctor {
+    text-align: center;
+  }
+  
+  .doctor img {
+    border-radius: 50%;
+  }
+  
+  .doctor h3 {
+    margin: 10px 0 5px;
+  }
+  
+  .doctor p {
+    margin: 0;
+    font-size: 1rem;
+  }
