@@ -9,49 +9,47 @@ import Services from './components/Services';
 const HomePage = () => {
   return (
     <div className="font-sans text-gray-900">
-      {/* Navbar */}
-      <header className="bg-aqua text-white shadow-md fixed w-full z-50">
         <Navbar />
-      </header>
+      {/* </header> */}
 
       {/* Hero Section */}
-      <section className="bg-soft-gray text-center py-20 px-4 sm:px-8">
+      {/* <section className="bg-soft-gray text-center py-20 px-4 sm:px-8"> */}
         <Hero />
-      </section>
+      {/* </section> */}
 
       {/* Services Section */}
-      <section className="py-12 bg-white text-gray-800">
-        <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
+      {/* <section className="py-12 bg-white text-gray-800">
+        <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8"> */}
           <Services />
-        </div>
-      </section>
+        {/* </div> */}
+      {/* </section> */}
 
       {/* Doctors Section */}
-      <section className="bg-soft-gray py-12 text-gray-800">
-        <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
+      {/* <section className="bg-soft-gray py-12 text-gray-800"> */}
+        {/* <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8"> */}
           <Doctors />
-        </div>
-      </section>
+        {/* </div>
+      </section> */}
 
       {/* Contact Section */}
-      <section className="bg-white py-12 text-gray-800">
-        <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
+      {/* <section className="bg-white py-12 text-gray-800">
+        <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8"> */}
           <Contact />
-        </div>
-      </section>
+        {/* </div>
+      </section> */}
 
       {/* Footer */}
-      <footer className="bg-tango text-white py-6">
-        <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
+      {/* <footer className="bg-tango text-white py-6">
+        <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8"> */}
           <Footer />
-        </div>
-      </footer>
+        {/* </div>
+      </footer> */}
 
       {/* Extra content or placeholder */}
-      <div className="text-center py-4 text-tango font-semibold">
+      {/* <div className="text-center py-4 text-tango font-semibold"> */}
         abc
       </div>
-    </div>
+    // </div>
   );
 }
 
