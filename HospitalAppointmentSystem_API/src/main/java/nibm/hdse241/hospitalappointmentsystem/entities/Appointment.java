@@ -15,13 +15,25 @@ public class Appointment {
     private String patientEmail;
     private String appointmentTime;
     private String appointmentDate;
-    private boolean appointmentStatus;
+    private boolean isCanceled;
+
     public Appointment() {
-        id = 0; patientName = ""; doctorName = ""; patientMobile = ""; patientEmail = ""; appointmentTime = ""; appointmentDate = ""; appointmentStatus = false;
+        id = 0;
+        patientName = "";
+        doctorName = "";
+        patientMobile = "";
+        patientEmail = "";
+        appointmentTime = "";
+        appointmentDate = "";
     }
 
+    // Getters and setters
     public int getId() {
         return id;
+    }
+
+    public void setId(int id) {
+        this.id = id;
     }
 
     public String getPatientIndex() {
@@ -32,36 +44,8 @@ public class Appointment {
         this.patientIndex = patientIndex;
     }
 
-    public void setId(int id) {
-        this.id = id;
-    }
-
     public String getPatientName() {
         return patientName;
-    }
-
-    public String getPatientMobile(String patientMobile) {
-        return this.patientMobile;
-    }
-
-    public String getPatientMobile() {
-        return patientMobile;
-    }
-
-    public String getPatientEmail() {
-        return patientEmail;
-    }
-
-    public void setPatientMobile(String patientMobile) {
-        this.patientMobile = patientMobile;
-    }
-
-    public String getPatientEmail(String patientEmail) {
-        return this.patientEmail;
-    }
-
-    public void setPatientEmail(String patientEmail) {
-        this.patientEmail = patientEmail;
     }
 
     public void setPatientName(String patientName) {
@@ -74,6 +58,22 @@ public class Appointment {
 
     public void setDoctorName(String doctorName) {
         this.doctorName = doctorName;
+    }
+
+    public String getPatientMobile() {
+        return patientMobile;
+    }
+
+    public void setPatientMobile(String patientMobile) {
+        this.patientMobile = patientMobile;
+    }
+
+    public String getPatientEmail() {
+        return patientEmail;
+    }
+
+    public void setPatientEmail(String patientEmail) {
+        this.patientEmail = patientEmail;
     }
 
     public String getAppointmentTime() {
@@ -92,11 +92,22 @@ public class Appointment {
         this.appointmentDate = appointmentDate;
     }
 
-    public boolean isAppointmentStatus() {
-        return appointmentStatus;
+    public boolean isCanceled() {
+        return isCanceled;
     }
 
-    public void setAppointmentStatus(boolean appointmentStatus) {
-        this.appointmentStatus = appointmentStatus;
+    public void setCanceled(boolean setCanceled) {
+        this.isCanceled = setCanceled;
+    }
+
+    public void updateFrom(Appointment newAppointment) {
+        this.patientIndex = newAppointment.getPatientIndex();
+        this.patientName = newAppointment.getPatientName();
+        this.doctorName = newAppointment.getDoctorName();
+        this.patientMobile = newAppointment.getPatientMobile();
+        this.patientEmail = newAppointment.getPatientEmail();
+        this.appointmentTime = newAppointment.getAppointmentTime();
+        this.appointmentDate = newAppointment.getAppointmentDate();
+        this.isCanceled = newAppointment.isCanceled();
     }
 }
