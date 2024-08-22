@@ -1,4 +1,6 @@
+/* eslint-disable no-unused-vars */
 import { StrictMode } from 'react'
+import { compile } from "@fileforge/react-print";
 import { createRoot } from 'react-dom/client'
 import App from './App.jsx'
 import './index.css'

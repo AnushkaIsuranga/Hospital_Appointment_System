@@ -1,30 +1,37 @@
 import axios from 'axios';
 
-const API_URL = "http://localhost:8080/api";
+// Base API URL for appointments.
+const API_URL = "http://localhost:8080/api/appointments";
 
 class AppointmentService {
+    // Save a new appointment.
     saveAppointment(appointment) {
-        return axios.post(`${API_URL}/appointments`, appointment);
+        return axios.post(`${API_URL}/save`, appointment);
     }
 
+    // Retrieve all appointments.
     getAppointments() {
-        return axios.get(`${API_URL}/appointments`);
+        return axios.get(`${API_URL}`);
     }
 
+    // Delete an appointment by ID.
     deleteAppointment(id) {
-        return axios.delete(`${API_URL}/appointments/${id}`);
+        return axios.delete(`${API_URL}/${id}`);
     }
 
+    // Get a specific appointment by ID.
     getAppointmentById(id) {
-        return axios.get(`${API_URL}/appointments/${id}`);
-    }
+        return axios.get(`${API_URL}/${id}`);
+    };
 
+    // Update an appointment by ID.
     updateAppointment(appointment, id) {
-        return axios.put(`${API_URL}/appointments/${id}`, appointment);
+        return axios.put(`${API_URL}/${id}`, appointment);
     }
 
+    // Search for appointments by date and time.
     getAppointmentsByDateAndTime(appointmentDate, appointmentTime) {
-        return axios.get(`${API_URL}/appointments/search`, {
+        return axios.get(`${API_URL}/search`, {
             params: {
                 appointmentDate: appointmentDate,
                 appointmentTime: appointmentTime.trim()
@@ -32,25 +39,51 @@ class AppointmentService {
         });
     }
 
+    // Retrieve active appointments.
     getActiveAppointments() {
-        return axios.get(`${API_URL}/appointments/active`);
+        return axios.get(`${API_URL}/active`);
     }
 
+    // Retrieve canceled appointments.
     getCanceledAppointments() {
-        return axios.get(`${API_URL}/appointments/canceled`);
+        return axios.get(`${API_URL}/canceled`);
     }
 
+    // Cancel an appointment by ID.
     cancelAppointment(id) {
-        return axios.put(`${API_URL}/appointments/cancel/${id}`);
+        return axios.put(`${API_URL}/cancel/${id}`);
     }
 
+    // Revive a canceled appointment by ID.
     reviveAppointment(id) {
-        return axios.put(`${API_URL}/appointments/revive/${id}`);
+        return axios.put(`${API_URL}/revive/${id}`);
     }
 
+    // Replace an appointment.
     replaceAppointment(appointment) {
-        return axios.post(`${API_URL}/appointments/replace`, appointment);
+        return axios.post(`${API_URL}/replace`, appointment);
+    }
+
+    // Get total number of appointments.
+    getTotalAppointments() {
+        return axios.get(`${API_URL}/total`);
+    }
+
+    // Get appointments grouped by doctor.
+    getAppointmentsByDoctor() {
+        return axios.get(`${API_URL}/by_doctor`);
+    }
+
+    // Get appointments grouped by time slot.
+    getAppointmentsByTimeSlot() {
+        return axios.get(`${API_URL}/by_time_slot`);
+    }
+
+    // Get count of canceled appointments.
+    getCanceledAppointmentsCount() {
+        return axios.get(`${API_URL}/canceled/count`);
     }
 }
 
+// Export an instance of AppointmentService.
 export default new AppointmentService();

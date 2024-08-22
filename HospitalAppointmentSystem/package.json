@@ -10,7 +10,14 @@
     "preview": "vite preview"
   },
   "dependencies": {
+    "@fileforge/react-print": "^0.1.144",
+    "@react-pdf/renderer": "^3.4.4",
     "axios": "^1.7.4",
+    "emailjs-com": "^3.2.0",
+    "hospital-appointmentsys-dashboard": "file:",
+    "html2canvas": "^1.4.1",
+    "html2pdf.js": "^0.10.2",
+    "jspdf": "^2.5.1",
     "prop-types": "^15.8.1",
     "react": "^18.3.1",
     "react-datepicker": "^7.3.0",
@@ -23,6 +30,7 @@
     "@types/react-dom": "^18.3.0",
     "@vitejs/plugin-react": "^4.3.1",
     "autoprefixer": "^10.4.20",
+    "concurrently": "^8.2.2",
     "eslint": "^9.9.0",
     "eslint-plugin-react": "^7.35.0",
     "eslint-plugin-react-hooks": "^5.1.0-rc.0",

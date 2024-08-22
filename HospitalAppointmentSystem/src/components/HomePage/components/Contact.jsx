@@ -1,13 +1,12 @@
-import React from 'react'
-import './Contact.css'
+import React from 'react';
 
 const Contact = () => {
   return (
-    <section id="contact" className="contact">
-      <h2>Contact Us</h2>
-      <p>Email: info@hospital.com</p>
-      <p>Phone: +1 (555) 123-4567</p>
-      <p>Address: 123 Medical St., Health City, Country</p>
+    <section id="contact" className='p-10 scroll-mt-16 bg-gray-300'>
+      <h2 className='font-bold pb-2 text-2xl'>Contact Us</h2>
+      <p className='pb-1'><span className='font-bold'>Email:</span> info@hospital.com</p>
+      <p className='pb-1'><span className='font-bold'>Phone:</span> +94 123-456789</p>
+      <p className=''><span className='font-bold'>Address:</span> 123 Abc St., Abc City, Abc</p>
     </section>
   );
 };

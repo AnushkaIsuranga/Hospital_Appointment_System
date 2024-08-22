@@ -2,6 +2,8 @@
 @tailwind components;
 @tailwind utilities;
 
+@layer base { img { display: initial; } }
+
 @layer components {
   .display {
     @apply flex items-center justify-center h-screen bg-cover bg-center;
@@ -43,13 +45,5 @@
   .dropdown {
     @apply relative inline-block w-full;
   }
-
-  .dropdown-content {
-    @apply absolute left-0 mt-1 w-full bg-white border border-gray-300 rounded-lg shadow-lg z-10 transition-opacity opacity-0;
-  }
-
-  .dropdown:hover .dropdown-content,
-  .dropdown:focus-within .dropdown-content {
-    @apply opacity-100;
-  }
 }
+

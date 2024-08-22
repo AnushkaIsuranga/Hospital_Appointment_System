@@ -5,19 +5,19 @@ import Services from './components/Services';
 import Doctors from './components/Doctors';
 import Contact from './components/Contact';
 import Footer from './components/Footer';
-import './App.css';
+import About from './components/About';
 
 const HomePage = () => {
   return (
-    <>
+    <div className='scroll-smooth cursor-default'>
       <Navbar />
       <Hero />
+      <About/>
       <Services />
       <Doctors />
       <Contact />
       <Footer />
-      abc
-    </>
+    </div>
   );
 }
 

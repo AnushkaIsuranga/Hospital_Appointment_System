@@ -4,10 +4,12 @@ import DatePicker from 'react-datepicker';
 import 'react-datepicker/dist/react-datepicker.css';
 import appointmentService from '../services/appointmentService';
 import background from '../assets/image4.jpg';
-import '../assets/alert.css';
 
-const UpdateAppointment = () => {
-    const { id } = useParams();
+const EditAppointment = () => {
+    const { id } = useParams(); // Get the appointment ID from the URL parameters
+    const navigate = useNavigate(); // Hook for navigation
+
+    // State to hold the appointment data
     const [appointment, setAppointment] = useState({
         id: "",
         patientName: "",
@@ -18,17 +20,18 @@ const UpdateAppointment = () => {
         appointmentDate: "",
     });
 
-    const [timeSlots, setTimeSlots] = useState([]);
-    const [selectedDate, setSelectedDate] = useState(null);
-    const [showAlert, setShowAlert] = useState(false);
-    const navigate = useNavigate();
+    const [timeSlots, setTimeSlots] = useState([]); // State for available time slots
+    const [selectedDate, setSelectedDate] = useState(null); // State for the selected date
+    const [showAlert, setShowAlert] = useState(false); // State for showing an alert message
 
+    // Available doctors and their respective time slots
     const doctors = {
         "Dr. Smith": ["9am - 10am", "11am - 12pm", "2pm - 3pm"],
         "Dr. Johnson": ["10am - 11am", "1pm - 2pm", "3pm - 4pm"],
         "Dr. Williams": ["8am - 9am", "12pm - 1pm", "4pm - 5pm"]
     };
 
+    // Style for the background image
     const backgroundStyle = {
         backgroundImage: `url(${background})`,
         backgroundSize: 'cover',
@@ -37,21 +40,21 @@ const UpdateAppointment = () => {
         width: '100%',
     };
 
+    // Fetch the appointment data on component mount
     useEffect(() => {
         const fetchData = async () => {
             try {
-                const response = await appointmentService.getAppointmentById(id);
+                const response = await appointmentService.getAppointmentById(id); // Fetch appointment by ID
                 const appointmentData = response.data;
-                
-                // Update state with fetched appointment data
-                setAppointment(appointmentData);
 
-                // Set selected date if appointment date is present
+                setAppointment(appointmentData); // Set the fetched appointment data
+
+                // If the appointment has a date, set it in the date picker
                 if (appointmentData.appointmentDate) {
                     setSelectedDate(new Date(appointmentData.appointmentDate));
                 }
 
-                // Set available time slots based on the doctor
+                // If a doctor is selected, update the available time slots
                 if (appointmentData.doctorName) {
                     setTimeSlots(doctors[appointmentData.doctorName] || []);
                 }
@@ -60,50 +63,57 @@ const UpdateAppointment = () => {
             }
         };
         fetchData();
-    }, [id]);
+    }, [id]); // Dependency array to run the effect only when the ID changes
 
+    // Handle changes in input fields
     const handleChange = (e) => {
         const { name, value } = e.target;
-        setAppointment((prev) => ({ ...prev, [name]: value }));
+        setAppointment((prev) => ({ ...prev, [name]: value })); // Update the appointment state
     };
 
+    // Handle changes in the doctor selection
     const handleDoctorChange = (e) => {
         const selectedDoctor = e.target.value;
-        setAppointment((prev) => ({ ...prev, doctorName: selectedDoctor }));
-        setTimeSlots(doctors[selectedDoctor] || []);
+        setAppointment((prev) => ({ ...prev, doctorName: selectedDoctor })); // Update the doctor name in the appointment
+        setTimeSlots(doctors[selectedDoctor] || []); // Update the available time slots
     };
 
+    // Handle changes in the date picker
     const handleDateChange = (date) => {
-        setSelectedDate(date);
+        setSelectedDate(date); // Update the selected date
         setAppointment((prev) => ({
             ...prev,
-            appointmentDate: date.toISOString().split('T')[0]
+            appointmentDate: date.toISOString().split('T')[0] // Format the date and update the appointment state
         }));
     };
 
+    // Handle form submission to update the appointment
     const updateAppointment = (e) => {
-        e.preventDefault();
+        e.preventDefault(); // Prevent default form submission behavior
 
+        // Validate required fields
         if (!appointment.patientName || !appointment.doctorName || !appointment.patientMobile || !appointment.patientEmail || !appointment.appointmentTime || !appointment.appointmentDate) {
-            setShowAlert(true);
+            setShowAlert(true); // Show alert if validation fails
             setTimeout(() => {
                 setShowAlert(false);
-            }, 5000);
+            }, 5000); // Hide alert after 5 seconds
             return;
         }
 
+        // Send the updated appointment data to the server
         appointmentService.updateAppointment(appointment, appointment.id)
             .then((response) => {
-                navigate("/appointment-dash");
+                navigate("/appointment-dash"); // Navigate to the dashboard on success
             })
             .catch((error) => {
                 console.error('Error updating appointment:', error);
             });
     };
 
+    // Handle the back button to navigate back to the dashboard
     const back = (e) => {
         e.preventDefault();
-        navigate('/appointment-dash');
+        navigate('/appointment-dash'); // Navigate back to the dashboard
     };
 
     return (
@@ -189,14 +199,14 @@ const UpdateAppointment = () => {
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4 p-2">
                         <button
                             type="submit"
-                            className="w-full py-2 bg-cyan-400 text-white rounded-md transition-colors duration-300 hover:bg-blue-700"
+                            className="w-full py-2 font-bold bg-cyan-400 text-white rounded-md transition-colors duration-300 hover:bg-cyan-700"
                         >
                             Update
                         </button>
                         <button
                             type="button"
                             onClick={back}
-                            className="w-full py-2 bg-gray-600 text-white rounded-md transition-colors duration-300 hover:bg-gray-700"
+                            className="w-full py-2 font-bold bg-gray-600 text-white rounded-md transition-colors duration-300 hover:bg-gray-700"
                         >
                             Back
                         </button>
@@ -205,11 +215,11 @@ const UpdateAppointment = () => {
             </div>
             {showAlert && (
                 <div className="fixed bottom-4 right-4 bg-red-500 text-white p-4 rounded-lg shadow-lg transition-opacity duration-300">
-                    <p>Please fill in all required fields.</p>
+                    <p>Please fill in all the required fields.</p>
                 </div>
             )}
         </div>
     );
 };
 
-export default UpdateAppointment;
+export default EditAppointment;

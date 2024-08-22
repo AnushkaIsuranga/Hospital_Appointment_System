@@ -1,12 +1,20 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import DatePicker from 'react-datepicker';
+import sendAppointmentEmail from '../services/emailService';
 import 'react-datepicker/dist/react-datepicker.css';
 import appointmentService from '../services/appointmentService';
 import background from '../assets/image4.jpg';
-import '../assets/alert.css';
 
 const AddAppointment = () => {
+    // Function to generate the next patient index based on the count and time slot
+    const getNextIndex = (count, timeSlot) => {
+        const slotNumber = Object.values(doctors).flat().indexOf(timeSlot) + 1;
+        const indexNumber = count.toString().padStart(2, '0');
+        return `P${slotNumber}-${indexNumber}`;
+    };
+
+    // Initialize state for appointment details
     const [appointment, setAppointment] = useState({
         patientName: "",
         doctorName: "",
@@ -18,17 +26,20 @@ const AddAppointment = () => {
         isCanceled: false,
     });
 
+    // State for available time slots and selected date
     const [timeSlots, setTimeSlots] = useState([]);
     const [selectedDate, setSelectedDate] = useState(null);
     const [showAlert, setShowAlert] = useState(false);
     const navigate = useNavigate();
 
+    // Predefined list of doctors and their available time slots
     const doctors = {
         "Dr. Smith": ["9am - 10am", "11am - 12pm", "2pm - 3pm"],
         "Dr. Johnson": ["10am - 11am", "1pm - 2pm", "3pm - 4pm"],
         "Dr. Williams": ["8am - 9am", "12pm - 1pm", "4pm - 5pm"]
     };
 
+    // Styling for the background image
     const backgroundStyle = {
         backgroundImage: `url(${background})`,
         backgroundSize: 'cover',
@@ -37,6 +48,7 @@ const AddAppointment = () => {
         width: '100%',
     };
 
+    // Effect to fetch existing appointments and set the next patient index
     useEffect(() => {
         if (appointment.appointmentDate && appointment.appointmentTime) {
             console.log("Fetching appointments for:", appointment.appointmentDate, appointment.appointmentTime);
@@ -52,29 +64,38 @@ const AddAppointment = () => {
                     console.error("Error fetching appointments:", error);
                 });
         }
-    }, [appointment.appointmentDate, appointment.appointmentTime]);
-    
+    }, [appointment.appointmentDate, appointment.appointmentTime, getNextIndex]);
+
+    // Handle change in doctor selection and update available time slots
     const handleDoctorChange = (e) => {
         const selectedDoctor = e.target.value;
-        setAppointment(prev => ({ ...prev, doctorName: selectedDoctor, appointmentTime: "" }));
+        console.log("Selected Doctor:", selectedDoctor); 
+        setAppointment((prev) => ({
+            ...prev,
+            doctorName: selectedDoctor,
+            appointmentTime: "",
+            patientIndex: ""
+        }));
         setTimeSlots(doctors[selectedDoctor] || []);
-        setAppointment(prev => ({ ...prev, patientIndex: "" })); // Reset the patient index when doctor changes
     };
-    
 
+    // Handle changes in form fields and update state
     const handleChange = (e) => {
         const { name, value } = e.target;
         setAppointment((prev) => ({ ...prev, [name]: value }));
     };
 
+    // Handle date change and update the appointment date in state
     const handleDateChange = (date) => {
         setSelectedDate(date);
         setAppointment((prev) => ({ ...prev, appointmentDate: date.toISOString().split('T')[0] }));
     };    
 
+    // Handle form submission to add a new appointment
     const addAppointment = (e) => {
         e.preventDefault();
 
+        // Check if all fields are filled, show alert if not
         if (!appointment.patientName || !appointment.doctorName || !appointment.patientMobile || !appointment.patientEmail || !appointment.appointmentTime || !appointment.appointmentDate) {
             setShowAlert(true);
             setTimeout(() => {
@@ -83,14 +104,25 @@ const AddAppointment = () => {
             return;
         }
 
+        // Create a new appointment object
         const newAppointment = {
             ...appointment,
             isCanceled: false
         };
 
+        // Save the appointment and send a confirmation email
         appointmentService.saveAppointment(newAppointment)
-            .then((response) => {
+            .then(async (response) => {
                 console.log(response);
+                try {
+                    await sendAppointmentEmail({
+                        ...newAppointment,
+                        id: response.data.id // Assuming the ID comes from the response
+                    });
+                    console.log('Email sent successfully');
+                } catch (error) {
+                    console.error('Error sending email:', error);
+                }
                 navigate("/home");
             })
             .catch((error) => {
@@ -98,17 +130,13 @@ const AddAppointment = () => {
             });
     };
 
+    // Handle the back button to navigate to the home page
     const back = (e) => {
         e.preventDefault();
         navigate(`/home`)
     };
 
-    const getNextIndex = (count, timeSlot) => {
-        const slotNumber = Object.values(doctors).flat().indexOf(timeSlot) + 1;
-        const indexNumber = count.toString().padStart(2, '0');
-        return `P${slotNumber}-${indexNumber}`;
-    };
-
+    // Render the form for adding a new appointment
     return (
         <div className="display" style={backgroundStyle}>
             <div className="border-solid w-full h-full shadow-0 border-0 rounded-3xl p-6 sm:border-2 sm:w-[600px] sm:h-auto sm:shadow-xl bg-white bg-opacity-75 hover-scale-none transition-transform sm:hover-scale-up">
@@ -131,7 +159,7 @@ const AddAppointment = () => {
                                 name="doctorName"
                                 value={appointment.doctorName}
                                 onChange={handleDoctorChange}
-                                className="border-2 border-gray-300 w-full h-8 sm:w-full rounded-lg p-4 transition-colors duration-300 focus:outline-none focus:border-cyan-400"
+                                className="border-2 border-gray-300 w-full h-8 sm:w-full rounded-lg pl-2 transition-colors duration-300 focus:outline-none focus:border-cyan-400"
                             >
                                 <option value="">Select a Doctor</option>
                                 {Object.keys(doctors).map((doctor) => (
@@ -169,7 +197,7 @@ const AddAppointment = () => {
                                 name="appointmentTime"
                                 value={appointment.appointmentTime}
                                 onChange={handleChange}
-                                className="border-2 border-gray-300 w-full sm:w-full h-8 rounded-lg p-4 transition-colors duration-300 focus:outline-none focus:border-cyan-400"
+                                className="border-2 border-gray-300 w-full h-8 sm:w-full rounded-lg pl-2 transition-colors duration-300 focus:outline-none focus:border-cyan-400"
                             >
                                 <option value="">Select a Time Slot</option>
                                 {timeSlots.map((slot, index) => (
@@ -190,37 +218,30 @@ const AddAppointment = () => {
                         </div>
                     </div>
                     <div className="flex gap-6 p-2 items-center">
-                        <label className="pr-3 text-gray-600 text-nowrap">Patient Index</label>
+                        <label className="pr-3 text-gray-600">Patient Index</label>
                         <input
                             type="text"
                             name="patientIndex"
                             value={appointment.patientIndex}
                             readOnly
-                            className="border-2 border-gray-300 w-full h-8 sm:w-full rounded-lg p-4 transition-colors duration-300 focus:outline-none focus:border-cyan-400"
+                            className="border-2 border-gray-300 w-full sm:w-full h-8 rounded-lg p-4 transition-colors duration-300 focus:outline-none focus:border-cyan-400"
                         />
                     </div>
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6 p-2">
-                        <button
-                            type="submit"
-                            className="w-full py-2 bg-cyan-400 text-white rounded-md transition-colors duration-300 hover:bg-cyan-600"
-                        >
-                            Add
-                        </button>
-                        <button
-                            type="button"
-                            onClick={back}
-                            className="w-full py-2 bg-gray-600 text-white rounded-md transition-colors duration-300 hover:bg-gray-700"
-                        >
+                    {showAlert && (
+                        <div className="text-center bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative">
+                            Please fill in all fields before submitting the form.
+                        </div>
+                    )}
+                    <div className="flex justify-between pt-6 gap-4">
+                        <button onClick={back} className="bg-red-500 hover:bg-red-600 text-white font-bold py-2 px-4 rounded">
                             Back
+                        </button>
+                        <button type="submit" className="bg-cyan-500 hover:bg-cyan-600 text-white font-bold py-2 px-4 rounded">
+                            Add Appointment
                         </button>
                     </div>
                 </form>
             </div>
-            {showAlert && (
-                <div className="fixed bottom-4 right-4 bg-red-500 text-white p-4 rounded-lg shadow-lg transition-opacity duration-300 opacity-0">
-                    <p>Please fill in all fields</p>
-                </div>
-            )}
         </div>
     );
 };
