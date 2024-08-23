@@ -246,7 +246,7 @@ const ActiveAppointments = () => {
             ) : (
               filteredAppointments.map((appointment) => (
                 <tr key={appointment.id}>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">{appointment.patientId}</td>
+                  <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">{appointment.id}</td>
                   <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{appointment.patientIndex}</td>
                   <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{appointment.patientName}</td>
                   <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{appointment.doctorName}</td>

@@ -12,7 +12,6 @@ const EditAppointment = () => {
     // State to hold the appointment data
     const [appointment, setAppointment] = useState({
         id: "",
-        patientName: "",
         doctorName: "",
         patientMobile: "",
         patientEmail: "",

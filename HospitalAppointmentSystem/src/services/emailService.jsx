@@ -3,20 +3,19 @@ import emailjs from 'emailjs-com';
 // Define constants for EmailJS service, template, and user IDs.
 const SERVICE_ID = 'service_70cs3vc';
 const TEMPLATE_ID = 'template_8wvqqa8';
-const USER_ID = 'user_nDNf3GocCkCuyD2ii';
+const USER_ID = 'nDNf3GocCkCuyD2ii';
 
 // Function to send an appointment email.
 const sendAppointmentEmail = async (appointment) => {
-    const { patientName, patientEmail, doctorName, appointmentDate, appointmentTime, patientIndex } = appointment;
+    const { patientEmail, doctorName, appointmentDate, appointmentTime, id } = appointment;
     
     // Set up email template parameters.
     const templateParams = {
-        patient_name: patientName,
         patient_email: patientEmail,
         doctor_name: doctorName,
         appointment_date: appointmentDate,
         appointment_time: appointmentTime,
-        patient_index: patientIndex
+        appointment_id: id
     };
 
     try {

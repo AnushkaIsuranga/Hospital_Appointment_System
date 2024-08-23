@@ -6,7 +6,7 @@ const API_URL = "http://localhost:8080/api/appointments";
 class AppointmentService {
     // Save a new appointment.
     saveAppointment(appointment) {
-        return axios.post(`${API_URL}/save`, appointment);
+        return axios.post(`${API_URL}`, appointment);
     }
 
     // Retrieve all appointments.

@@ -16,7 +16,6 @@ const AddAppointment = () => {
 
     // Initialize state for appointment details
     const [appointment, setAppointment] = useState({
-        patientName: "",
         doctorName: "",
         patientMobile: "",
         patientEmail: "",
@@ -120,10 +119,10 @@ const AddAppointment = () => {
                         id: response.data.id // Assuming the ID comes from the response
                     });
                     console.log('Email sent successfully');
+                    navigate("/home");
                 } catch (error) {
                     console.error('Error sending email:', error);
                 }
-                navigate("/home");
             })
             .catch((error) => {
                 console.error('Error adding appointment:', error);
@@ -233,10 +232,10 @@ const AddAppointment = () => {
                         </div>
                     )}
                     <div className="flex justify-between pt-6 gap-4">
-                        <button onClick={back} className="bg-red-500 hover:bg-red-600 text-white font-bold py-2 px-4 rounded">
+                        <button onClick={back} className="bg-red-500 w-full transition-colors duration-300 hover:bg-red-600 text-white font-bold py-2 px-4 rounded">
                             Back
                         </button>
-                        <button type="submit" className="bg-cyan-500 hover:bg-cyan-600 text-white font-bold py-2 px-4 rounded">
+                        <button type="submit" className="bg-cyan-500 w-full transition-colors duration-300 hover:bg-cyan-600 text-white font-bold py-2 px-4 rounded">
                             Add Appointment
                         </button>
                     </div>

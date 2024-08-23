@@ -26,19 +26,19 @@ public class appointmentController {
     }
 
     // Endpoint to create a new appointment
-    @PostMapping("/save")
+    @PostMapping("")
     public Appointment newAppointment(@RequestBody appointmentDTO appointmentDTO) {
         return appointmentService.createAppointment(appointmentDTO);
     }
 
     // Endpoint to update an existing appointment by ID
-    @PutMapping("/edit/{id}")
+    @PutMapping("/{id}")
     public ResponseEntity<Appointment> updateAppointment(@PathVariable int id, @RequestBody appointmentDTO appointmentDTO) {
         return appointmentService.updateAppointment(id, appointmentDTO);
     }
 
     // Endpoint to delete an appointment by ID
-    @DeleteMapping("/delete/{id}")
+    @DeleteMapping("/{id}")
     public ResponseEntity<String> deleteAppointment(@PathVariable int id) {
         return appointmentService.deleteAppointment(id).getStatusCode() == HttpStatus.NO_CONTENT ?
                 new ResponseEntity<>("Deleted!", HttpStatus.NO_CONTENT) :
