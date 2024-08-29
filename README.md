@@ -59,5 +59,3 @@ For any issues or questions, please contact the project maintainer at [isuranga8
 ---
 
 **Happy Coding!**
-
-This `README.md` file provides clear instructions on how to set up and run your Hospital Appointment Management System. Let me know if you need any adjustments or additional sections!
