@@ -56,6 +56,3 @@ You will now be redirected to the admin panel where you can manage appointments.
 
 For any issues or questions, please contact the project maintainer at [isuranga880@gmail.com](mailto:isuranga880@gmail.com).
 
----
-
-**Happy Coding!**
