@@ -7,7 +7,7 @@ const About = () => {
       <div className="container mx-auto text-center">
         <h2 className="text-3xl font-bold mb-8">About Duskwood Health Care</h2>
         <div className="grid grid-cols-1 md:grid-cols-2 items-center justify-center gap-8">
-          <div className="flex-1 h-[350px] w-full rounded-lg shadow-lg" style={{backgroundImage: `url(${Image})`, backgroundRepeat: `none`}}></div>
+          <div className="flex-1 h-[350px] w-full bg-no-repeat bg-cover rounded-lg shadow-lg" style={{backgroundImage: `url(${Image})`, backgroundRepeat: `none`}}></div>
 
           <div className="flex-1">
             <p className="text-xl mb-6">
