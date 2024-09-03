@@ -231,7 +231,7 @@ const AddAppointment = () => {
                             Please fill in all fields before submitting the form.
                         </div>
                     )}
-                    <div className="flex justify-between pt-6 gap-4">
+                    <div className="flex justify-between pt-2 xs:pt-6 gap-4">
                         <button onClick={back} className="bg-red-500 w-full transition-colors duration-300 hover:bg-red-600 text-white font-bold py-2 px-4 rounded">
                             Back
                         </button>
