@@ -1,6 +1,8 @@
+/* eslint-disable no-unused-vars */
 import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import AppointmentService from '../../services/appointmentService';
+import mergeSort from '../../services/mergeSort'
 
 // Predefined list of doctors and their available time slots
 const doctors = {
@@ -43,22 +45,22 @@ const ActiveAppointments = () => {
       }
     };
 
+    // Merge sort function for sorting appointments
+    const mergeSort = (array) => {
+      if (array.length <= 1) return array;
+
+      const mid = Math.floor(array.length / 2);
+      const left = array.slice(0, mid);
+      const right = array.slice(mid);
+
+      return merge(mergeSort(left), mergeSort(right));
+    };
+
     fetchAppointments();
     // Set an interval to fetch appointments every minute
     const interval = setInterval(fetchAppointments, 60000);
     return () => clearInterval(interval);
-  }, []);
-
-  // Merge sort function for sorting appointments
-  const mergeSort = (array) => {
-    if (array.length <= 1) return array;
-
-    const mid = Math.floor(array.length / 2);
-    const left = array.slice(0, mid);
-    const right = array.slice(mid);
-
-    return merge(mergeSort(left), mergeSort(right));
-  };
+  }, [selectedDoctor]);
 
   // Merge function used in merge sort
   const merge = (left, right) => {
