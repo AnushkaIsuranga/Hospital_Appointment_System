@@ -72,8 +72,15 @@ const CanceledAppointments = () => {
   // Function to handle reviving an appointment
   const handleRevive = async (id) => {
     try {
-      await AppointmentService.reviveAppointment(id);
+      const response = await AppointmentService.reviveAppointment(id);
+      const updatedAppointment = response.data;
+  
+      // Remove from canceled appointments
       setAppointments(appointments.filter(app => app.id !== id));
+  
+      // Optionally add to active appointments list if needed
+      // activeAppointments.push(updatedAppointment);
+  
       setRevivedAppointmentId(id);
       setShowAlert(true);
       setTimeout(() => {
@@ -81,8 +88,10 @@ const CanceledAppointments = () => {
       }, 5000);
     } catch (error) {
       console.error('Error reviving appointment:', error);
+      // Handle error (e.g., show error message)
     }
   };
+  
 
   return (
     <div className="p-4 ml-10 mr-10 mb-10">
