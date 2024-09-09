@@ -81,7 +81,27 @@ class AppointmentService {
 
     // Get count of canceled appointments.
     getCanceledAppointmentsCount() {
-        return axios.get(`${API_URL}/canceled/count`);
+        return axios.get(`${API_URL}/canceled_count`);
+    }
+
+    // Get active appointments grouped by doctor.
+    getActiveAppointmentsByDoctor() {
+        return axios.get(`${API_URL}/active/by_doctor`);
+    }
+
+    // Get active appointments grouped by time slot.
+    getActiveAppointmentsByTimeSlot() {
+        return axios.get(`${API_URL}/active/by_time_slot`);
+    }
+
+    // Get canceled appointments grouped by doctor.
+    getCanceledAppointmentsByDoctor() {
+        return axios.get(`${API_URL}/canceled/by_doctor`);
+    }
+
+    // Get canceled appointments grouped by time slot.
+    getCanceledAppointmentsByTimeSlot() {
+        return axios.get(`${API_URL}/canceled/by_time_slot`);
     }
 }
 

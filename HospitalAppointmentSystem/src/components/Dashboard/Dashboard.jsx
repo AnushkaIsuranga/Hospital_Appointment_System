@@ -70,7 +70,7 @@ function Dashboard() {
 
     return (
         <div className=''>
-            <div className='w-screen bg-slate-500 p-5 pl-14 pr-14 flex justify-between items-center'>
+            <div className='w-screen bg-slate-500 p-5 pl-14 pr-14 flex justify-between items-center m-0'>
                 <h1 className="text-4xl text-white font-bold mb-4">Dashboard</h1>
                 <button 
                     className="bg-blue-500 text-white py-2 px-4 rounded-lg hover:bg-blue-600  transition-colors duration-300 focus:outline-none focus:ring-2 focus:ring-blue-300"

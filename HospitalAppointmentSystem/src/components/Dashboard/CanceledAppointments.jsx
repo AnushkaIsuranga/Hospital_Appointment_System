@@ -1,6 +1,7 @@
 /* eslint-disable no-unused-vars */
 import React, { useEffect, useState } from 'react';
 import AppointmentService from '../../services/appointmentService';
+import Statistics from './Statistics';
 
 const CanceledAppointments = () => {
   // Object to store doctors and their available time slots
@@ -72,15 +73,17 @@ const CanceledAppointments = () => {
   // Function to handle reviving an appointment
   const handleRevive = async (id) => {
     try {
-      const response = await AppointmentService.reviveAppointment(id);
-      const updatedAppointment = response.data;
-  
-      // Remove from canceled appointments
-      setAppointments(appointments.filter(app => app.id !== id));
-  
-      // Optionally add to active appointments list if needed
-      // activeAppointments.push(updatedAppointment);
-  
+      // Revive the appointment
+      await AppointmentService.reviveAppointment(id);
+
+      // Fetch the updated list of canceled appointments
+      const response = await AppointmentService.getCanceledAppointments();
+      const updatedAppointments = response.data;
+
+      // Update the state with the new list
+      setAppointments(updatedAppointments);
+      setFilteredAppointments(updatedAppointments);
+
       setRevivedAppointmentId(id);
       setShowAlert(true);
       setTimeout(() => {
@@ -91,7 +94,6 @@ const CanceledAppointments = () => {
       // Handle error (e.g., show error message)
     }
   };
-  
 
   return (
     <div className="p-4 ml-10 mr-10 mb-10">

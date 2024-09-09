@@ -3,6 +3,7 @@
 
 // Import React library
 import React from 'react';
+import appointmentService from '../../services/appointmentService';
 
 // ForwardRef used to pass the ref from the parent component
 const GenerateReport = React.forwardRef((props, ref) => {

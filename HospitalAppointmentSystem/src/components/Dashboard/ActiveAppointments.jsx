@@ -148,9 +148,15 @@ const ActiveAppointments = () => {
   const handleDelete = async (id) => {
     try {
       await AppointmentService.deleteAppointment(id);
-      setAppointments(appointments.filter(app => app.id !== id));
+      const updatedAppointments = await AppointmentService.getActiveAppointments();
+      const sortedAppointments = mergeSort(updatedAppointments.data);
+
+      setAppointments(sortedAppointments);
+      setFilteredAppointments(sortedAppointments);
+    
       setDeletedAppointmentId(id);
       setShowAlertDelete(true);
+    
       setTimeout(() => {
         setShowAlertDelete(false);
       }, 5000);
@@ -163,9 +169,15 @@ const ActiveAppointments = () => {
   const handleCancel = async (id) => {
     try {
       await AppointmentService.cancelAppointment(id);
-      setAppointments(appointments.filter(app => app.id !== id));
+      const updatedAppointments = await AppointmentService.getActiveAppointments();
+      const sortedAppointments = mergeSort(updatedAppointments.data);
+
+      setAppointments(sortedAppointments);
+      setFilteredAppointments(sortedAppointments);
+      
       setCanceledAppointmentId(id);
       setShowAlertCancel(true);
+      
       setTimeout(() => {
         setShowAlertCancel(false);
       }, 5000);
@@ -227,7 +239,7 @@ const ActiveAppointments = () => {
         </div>
       </div>
       {/* Table displaying filtered appointments */}
-      <div className="bg-white shadow-md rounded-lg">
+      <div className="bg-white shadow-md rounded-lg overflow-x-auto overflow-y-auto max-h-[340px]">
         <table className="min-w-full divide-y divide-gray-200 cursor-default">
           <thead className="bg-gray-50">
             <tr>
@@ -240,7 +252,7 @@ const ActiveAppointments = () => {
               <th className="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
             </tr>
           </thead>
-          <tbody className="bg-white divide-y divide-gray-200">
+          <tbody className="bg-white divide-y divide-gray-200 max-h-28 overflow-y-auto">
             {filteredAppointments.length === 0 ? (
               <tr>
                 <td colSpan="7" className="text-center p-4 text-gray-500">No appointments found</td>
