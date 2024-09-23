@@ -6,6 +6,7 @@ import ActiveAppointments from './ActiveAppointments';
 import CanceledAppointments from './CanceledAppointments';
 import Statistics from './Statistics';
 import GenerateReport from './GenerateReport';
+import DoctorRegister from '../Register/DoctorRegister';
 
 function Dashboard() {
     // State for active and canceled appointments
@@ -18,6 +19,13 @@ function Dashboard() {
     useEffect(() => {
         loadAppointments();
     }, []);
+
+    const navigate = useNavigate();
+
+    const doctorRegister = (e) => {
+        e.preventDefault();
+        navigate(`/register-doctor`);
+    };
 
     // Function to fetch active and canceled appointments
     const loadAppointments = async () => {
@@ -69,15 +77,24 @@ function Dashboard() {
     };
 
     return (
-        <div className=''>
+        <div className='relative'>
+            
             <div className='w-screen bg-slate-500 p-5 pl-14 pr-14 flex justify-between items-center m-0'>
-                <h1 className="text-4xl text-white font-bold mb-4">Dashboard</h1>
-                <button 
-                    className="bg-blue-500 text-white py-2 px-4 rounded-lg hover:bg-blue-600  transition-colors duration-300 focus:outline-none focus:ring-2 focus:ring-blue-300"
-                    onClick={generatePDF}
-                >
-                    Generate Report 
-                </button> 
+                <h1 className="text-4xl text-white font-bold mb-2">Dashboard</h1>
+                <div className='space-x-6'>
+                    <button 
+                        className="bg-blue-500 text-white py-2 px-4 rounded-lg hover:bg-blue-600 transition-colors duration-300 focus:outline-none focus:ring-2 focus:ring-blue-300"
+                        onClick={generatePDF}
+                    >
+                        Generate Report 
+                    </button>
+                    <button 
+                        className="bg-blue-500 text-white py-2 px-4 rounded-lg hover:bg-blue-600 transition-colors duration-300 focus:outline-none focus:ring-2 focus:ring-blue-300"
+                        onClick={doctorRegister}
+                    >
+                        Register Doctor
+                    </button>
+                </div>
             </div>
 
             <Statistics />

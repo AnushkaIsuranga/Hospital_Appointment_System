@@ -11,6 +11,7 @@ import org.springframework.stereotype.Service;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.Stack;
 import java.util.stream.Collectors;
 
 @Service // Marks this class as a service component
@@ -18,6 +19,9 @@ public class appointmentService {
 
     @Autowired // Automatically injects the appointmentRepository bean
     private appointmentRepository appointmentRepository;
+
+    // Stack to manage canceled appointments
+    private Stack<Appointment> canceledAppointmentsStack = new Stack<>();
 
     // Create a new appointment
     public Appointment createAppointment(appointmentDTO appointmentDTO) {
@@ -94,7 +98,9 @@ public class appointmentService {
         if (appointment.isPresent()) {
             Appointment app = appointment.get();
             app.setCanceled(true); // Mark the appointment as canceled
-            return new ResponseEntity<>(appointmentRepository.save(app), HttpStatus.OK);
+            appointmentRepository.save(app); // Save to database
+            canceledAppointmentsStack.push(app); // Push to stack
+            return new ResponseEntity<>(app, HttpStatus.OK);
         } else {
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);
         }
@@ -105,10 +111,15 @@ public class appointmentService {
         Optional<Appointment> appointment = appointmentRepository.findById(id);
         if (appointment.isPresent()) {
             Appointment app = appointment.get();
-            app.setCanceled(false); // Mark the appointment as not canceled
-            return new ResponseEntity<>(appointmentRepository.save(app), HttpStatus.OK);
+            if (app.isCanceled()) {
+                canceledAppointmentsStack.remove(app); // Remove from stack if present
+                app.setCanceled(false); // Mark the appointment as not canceled
+                return new ResponseEntity<>(appointmentRepository.save(app), HttpStatus.OK);
+            } else {
+                return new ResponseEntity<>(HttpStatus.NOT_FOUND); // Not canceled
+            }
         } else {
-            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND); // No such appointment
         }
     }
 
@@ -140,20 +151,18 @@ public class appointmentService {
         return appointmentRepository.count();
     }
 
-    // Get the number of appointments grouped by doctor
+    // Get the number of active appointments grouped by doctor
     public Map<String, Long> getAppointmentsByDoctor() {
-        return appointmentRepository.findAll().stream()
-                .collect(Collectors.groupingBy(
-                        Appointment::getDoctorName,
-                        Collectors.counting()
-                ));
-    }
+            // Logic to group appointments by doctor
+            return appointmentRepository.findAll().stream()
+                    .collect(Collectors.groupingBy(Appointment::getDoctorName, Collectors.counting()));
+        }
 
-    // Get the number of appointments grouped by time slot
+    // Get the number of all appointments grouped by time slot
     public Map<String, Long> getAppointmentsByTimeSlot() {
         return appointmentRepository.findAll().stream()
                 .collect(Collectors.groupingBy(
-                        Appointment::getAppointmentTime,
+                        appointment -> appointment.getAppointmentTime(),
                         Collectors.counting()
                 ));
     }
@@ -161,5 +170,41 @@ public class appointmentService {
     // Get the count of canceled appointments
     public Long getCanceledAppointmentsCount() {
         return appointmentRepository.countByIsCanceledTrue();
+    }
+
+    // Get the number of active appointments grouped by doctor
+    public Map<String, Long> getActiveAppointmentsByDoctor() {
+        // Logic to group appointments by doctor
+        return appointmentRepository.findAll().stream()
+                .filter(appointment -> !appointment.isCanceled())
+                .collect(Collectors.groupingBy(Appointment::getDoctorName, Collectors.counting()));
+    }
+
+    // Get the number of active appointments grouped by time slot
+    public Map<String, Long> getActiveAppointmentsByTimeSlot() {
+        return appointmentRepository.findAll().stream()
+                .filter(appointment -> !appointment.isCanceled())
+                .collect(Collectors.groupingBy(
+                        appointment -> appointment.getAppointmentTime(),
+                        Collectors.counting()
+                ));
+    }
+
+    // Get the number of canceled appointments grouped by doctor
+    public Map<String, Long> getCanceledAppointmentsByDoctor() {
+        // Logic to group appointments by doctor
+        return appointmentRepository.findAll().stream()
+                .filter(appointment -> appointment.isCanceled())
+                .collect(Collectors.groupingBy(Appointment::getDoctorName, Collectors.counting()));
+    }
+
+    // Get the number of canceled appointments grouped by time slot
+    public Map<String, Long> getCanceledAppointmentsByTimeSlot() {
+        return appointmentRepository.findAll().stream()
+                .filter(appointment -> appointment.isCanceled())
+                .collect(Collectors.groupingBy(
+                        appointment -> appointment.getAppointmentTime(),
+                        Collectors.counting()
+                ));
     }
 }

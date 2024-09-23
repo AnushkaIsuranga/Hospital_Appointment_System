@@ -18,4 +18,5 @@ public interface appointmentRepository extends JpaRepository<Appointment, Intege
 
     // Count the number of canceled appointments
     Long countByIsCanceledTrue();
+
 }

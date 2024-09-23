@@ -56,8 +56,6 @@ public class appointmentController {
     public List<Appointment> getAppointmentsByDateAndTime(
             @RequestParam("appointmentDate") String appointmentDate,
             @RequestParam("appointmentTime") String appointmentTime) {
-        System.out.println("Appointment Date: " + appointmentDate);
-        System.out.println("Appointment Time: " + appointmentTime);
         return appointmentService.getAppointmentsByDateAndTime(appointmentDate, appointmentTime);
     }
 
@@ -75,55 +73,103 @@ public class appointmentController {
 
     // Endpoint to cancel an appointment by ID
     @PutMapping("/cancel/{id}")
-    public ResponseEntity<String> cancelAppointment(@PathVariable int id) {
-        return appointmentService.cancelAppointment(id).getStatusCode() == HttpStatus.OK ?
-                new ResponseEntity<>("Canceled", HttpStatus.OK) :
-                new ResponseEntity<>("Not Found", HttpStatus.NOT_FOUND);
+    public ResponseEntity<Appointment> cancelAppointment(@PathVariable int id) {
+        return appointmentService.cancelAppointment(id);
     }
 
-    // Endpoint to revive a canceled appointment by ID
+    // Endpoint to revive the last canceled appointment
     @PutMapping("/revive/{id}")
-    public ResponseEntity<?> reviveAppointment(@PathVariable("id") int id) {
-        try {
-            Appointment appointment = appointmentService.reviveAppointment(id).getBody();
-            return ResponseEntity.ok(appointment);
-        } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Error reviving appointment");
-        }
+    public ResponseEntity<Appointment> reviveAppointment(@PathVariable int id) {
+        return appointmentService.reviveAppointment(id);
     }
 
     // Endpoint to replace an existing appointment with a new one
-    @PostMapping("/replace")
-    public ResponseEntity<?> replaceAppointment(@RequestBody Appointment newAppointment) {
-        try {
-            Appointment updatedAppointment = appointmentService.replaceAppointment(newAppointment).getBody();
-            return ResponseEntity.ok(updatedAppointment);
-        } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Error replacing appointment");
-        }
+    @PutMapping("/replace")
+    public ResponseEntity<Appointment> replaceAppointment(@RequestBody Appointment newAppointment) {
+        return appointmentService.replaceAppointment(newAppointment);
     }
 
-    // Endpoint to get the total number of appointments
+    // Endpoint to get total number of appointments
     @GetMapping("/total")
     public Long getTotalAppointments() {
         return appointmentService.getTotalAppointments();
     }
 
-    // Endpoint to get appointments by doctor
+    // Endpoint to get all appointments grouped by doctor
     @GetMapping("/by_doctor")
-    public Map<String, Long> getAppointmentsByDoctor() {
-        return appointmentService.getAppointmentsByDoctor();
+    public ResponseEntity<?> getAppointmentsByDoctor() {
+        try {
+            Map<String, Long> appointmentsByDoctor = appointmentService.getAppointmentsByDoctor();
+            return ResponseEntity.ok(appointmentsByDoctor);
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body("Error fetching appointments by doctor");
+        }
     }
 
-    // Endpoint to get appointments by time slot
+    // Endpoint to get all appointments grouped by time slot
     @GetMapping("/by_time_slot")
-    public Map<String, Long> getAppointmentsByTimeSlot() {
-        return appointmentService.getAppointmentsByTimeSlot();
+    public ResponseEntity<?> getAppointmentsByTimeSlot() {
+        try {
+            Map<String, Long> appointmentsByTimeSlot = appointmentService.getAppointmentsByTimeSlot();
+            return ResponseEntity.ok(appointmentsByTimeSlot);
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body("Error fetching appointments by time slot");
+        }
     }
 
     // Endpoint to get the count of canceled appointments
-    @GetMapping("/canceled/count")
+    @GetMapping("/canceled_count")
     public Long getCanceledAppointmentsCount() {
         return appointmentService.getCanceledAppointmentsCount();
+    }
+
+    // Endpoint to get active appointments grouped by doctor
+    @GetMapping("/active/by_doctor")
+    public ResponseEntity<?> getActiveAppointmentsByDoctor() {
+        try {
+            Map<String, Long> activeAppointmentsByDoctor = appointmentService.getActiveAppointmentsByDoctor();
+            return ResponseEntity.ok(activeAppointmentsByDoctor);
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body("Error fetching appointments by doctor");
+        }
+    }
+
+    // Endpoint to get active appointments grouped by time slot
+    @GetMapping("/active/by_time_slot")
+    public ResponseEntity<?> getActiveAppointmentsByTimeSlot() {
+        try {
+            Map<String, Long> activeAppointmentsByTimeSlot = appointmentService.getActiveAppointmentsByTimeSlot();
+            return ResponseEntity.ok(activeAppointmentsByTimeSlot);
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body("Error fetching appointments by time slot");
+        }
+    }
+
+    // Endpoint to get canceled appointments grouped by doctor
+    @GetMapping("/canceled/by_doctor")
+    public ResponseEntity<?> getCanceledAppointmentsByDoctor() {
+        try {
+            Map<String, Long> canceledAppointmentsByDoctor = appointmentService.getCanceledAppointmentsByDoctor();
+            return ResponseEntity.ok(canceledAppointmentsByDoctor);
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body("Error fetching appointments by doctor");
+        }
+    }
+
+    // Endpoint to get canceled appointments grouped by time slot
+    @GetMapping("/canceled/by_time_slot")
+    public ResponseEntity<?> getCanceledAppointmentsByTimeSlot() {
+        try {
+            Map<String, Long> canceledAppointmentsByTimeSlot = appointmentService.getCanceledAppointmentsByTimeSlot();
+            return ResponseEntity.ok(canceledAppointmentsByTimeSlot);
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body("Error fetching appointments by time slot");
+        }
     }
 }

@@ -4,17 +4,10 @@ import DatePicker from 'react-datepicker';
 import sendAppointmentEmail from '../services/emailService';
 import 'react-datepicker/dist/react-datepicker.css';
 import appointmentService from '../services/appointmentService';
+import doctorService from '../services/doctorService'; // Import the doctor service
 import background from '../assets/image4.jpg';
 
 const AddAppointment = () => {
-    // Function to generate the next patient index based on the count and time slot
-    const getNextIndex = (count, timeSlot) => {
-        const slotNumber = Object.values(doctors).flat().indexOf(timeSlot) + 1;
-        const indexNumber = count.toString().padStart(2, '0');
-        return `P${slotNumber}-${indexNumber}`;
-    };
-
-    // Initialize state for appointment details
     const [appointment, setAppointment] = useState({
         doctorName: "",
         patientMobile: "",
@@ -25,20 +18,12 @@ const AddAppointment = () => {
         isCanceled: false,
     });
 
-    // State for available time slots and selected date
     const [timeSlots, setTimeSlots] = useState([]);
     const [selectedDate, setSelectedDate] = useState(null);
     const [showAlert, setShowAlert] = useState(false);
+    const [doctors, setDoctors] = useState([]); // State for doctors
     const navigate = useNavigate();
 
-    // Predefined list of doctors and their available time slots
-    const doctors = {
-        "Dr. Smith": ["9am - 10am", "11am - 12pm", "2pm - 3pm"],
-        "Dr. Johnson": ["10am - 11am", "1pm - 2pm", "3pm - 4pm"],
-        "Dr. Williams": ["8am - 9am", "12pm - 1pm", "4pm - 5pm"]
-    };
-
-    // Styling for the background image
     const backgroundStyle = {
         backgroundImage: `url(${background})`,
         backgroundSize: 'cover',
@@ -47,54 +32,57 @@ const AddAppointment = () => {
         width: '100%',
     };
 
-    // Effect to fetch existing appointments and set the next patient index
+    // Fetch registered doctors on component mount
+    useEffect(() => {
+        doctorService.getDoctors()
+            .then(response => {
+                setDoctors(response.data);
+            })
+            .catch(error => {
+                console.error("Error fetching doctors:", error);
+            });
+    }, []);
+
     useEffect(() => {
         if (appointment.appointmentDate && appointment.appointmentTime) {
-            console.log("Fetching appointments for:", appointment.appointmentDate, appointment.appointmentTime);
             appointmentService.getAppointmentsByDateAndTime(appointment.appointmentDate, appointment.appointmentTime)
                 .then(response => {
                     const existingAppointments = response.data || [];
-                    console.log("Existing appointments:", existingAppointments);
                     const nextIndex = getNextIndex(existingAppointments.length + 1, appointment.appointmentTime);
-                    console.log("Next patient index:", nextIndex);
                     setAppointment(prev => ({ ...prev, patientIndex: nextIndex }));
                 })
                 .catch(error => {
                     console.error("Error fetching appointments:", error);
                 });
         }
-    }, [appointment.appointmentDate, appointment.appointmentTime, getNextIndex]);
+    }, [appointment.appointmentDate, appointment.appointmentTime]);
 
-    // Handle change in doctor selection and update available time slots
     const handleDoctorChange = (e) => {
         const selectedDoctor = e.target.value;
-        console.log("Selected Doctor:", selectedDoctor); 
         setAppointment((prev) => ({
             ...prev,
             doctorName: selectedDoctor,
             appointmentTime: "",
             patientIndex: ""
         }));
-        setTimeSlots(doctors[selectedDoctor] || []);
+        
+        // Find the selected doctor from the fetched doctors
+        const doctor = doctors.find(doc => doc.name === selectedDoctor);
+        setTimeSlots(doctor ? doctor.timeSlots : []); // Update available time slots
     };
 
-    // Handle changes in form fields and update state
     const handleChange = (e) => {
         const { name, value } = e.target;
         setAppointment((prev) => ({ ...prev, [name]: value }));
     };
 
-    // Handle date change and update the appointment date in state
     const handleDateChange = (date) => {
         setSelectedDate(date);
         setAppointment((prev) => ({ ...prev, appointmentDate: date.toISOString().split('T')[0] }));
-    };    
+    };
 
-    // Handle form submission to add a new appointment
     const addAppointment = (e) => {
         e.preventDefault();
-
-        // Check if all fields are filled, show alert if not
         if (!appointment.patientName || !appointment.doctorName || !appointment.patientMobile || !appointment.patientEmail || !appointment.appointmentTime || !appointment.appointmentDate) {
             setShowAlert(true);
             setTimeout(() => {
@@ -103,22 +91,11 @@ const AddAppointment = () => {
             return;
         }
 
-        // Create a new appointment object
-        const newAppointment = {
-            ...appointment,
-            isCanceled: false
-        };
-
-        // Save the appointment and send a confirmation email
+        const newAppointment = { ...appointment, isCanceled: false };
         appointmentService.saveAppointment(newAppointment)
             .then(async (response) => {
-                console.log(response);
                 try {
-                    await sendAppointmentEmail({
-                        ...newAppointment,
-                        id: response.data.id // Assuming the ID comes from the response
-                    });
-                    console.log('Email sent successfully');
+                    await sendAppointmentEmail({ ...newAppointment, id: response.data.id });
                     navigate("/home");
                 } catch (error) {
                     console.error('Error sending email:', error);
@@ -129,13 +106,11 @@ const AddAppointment = () => {
             });
     };
 
-    // Handle the back button to navigate to the home page
     const back = (e) => {
         e.preventDefault();
         navigate(`/home`)
     };
 
-    // Render the form for adding a new appointment
     return (
         <div className="display" style={backgroundStyle}>
             <div className="border-solid w-full h-full shadow-0 border-0 rounded-3xl p-6 sm:border-2 sm:w-[600px] sm:h-auto sm:shadow-xl bg-white bg-opacity-75 hover-scale-none transition-transform sm:hover-scale-up">
@@ -161,9 +136,9 @@ const AddAppointment = () => {
                                 className="border-2 border-gray-300 w-full h-8 sm:w-full rounded-lg pl-2 transition-colors duration-300 focus:outline-none focus:border-cyan-400"
                             >
                                 <option value="">Select a Doctor</option>
-                                {Object.keys(doctors).map((doctor) => (
-                                    <option key={doctor} value={doctor}>
-                                        {doctor}
+                                {doctors.map((doctor) => (
+                                    <option key={doctor.id} value={doctor.name}>
+                                        {doctor.name}
                                     </option>
                                 ))}
                             </select>
@@ -232,10 +207,10 @@ const AddAppointment = () => {
                         </div>
                     )}
                     <div className="flex justify-between pt-2 xs:pt-6 gap-4">
-                        <button onClick={back} className="bg-red-500 w-full transition-colors duration-300 hover:bg-red-600 text-white font-bold py-2 px-4 rounded">
+                        <button onClick={back} className="bg-red-500 w-full transition-colors duration-300 hover:bg-red-600 text-white font-bold py-2 rounded-lg">
                             Back
                         </button>
-                        <button type="submit" className="bg-cyan-500 w-full transition-colors duration-300 hover:bg-cyan-600 text-white font-bold py-2 px-4 rounded">
+                        <button type="submit" className="bg-blue-500 w-full transition-colors duration-300 hover:bg-blue-600 text-white font-bold py-2 rounded-lg">
                             Add Appointment
                         </button>
                     </div>

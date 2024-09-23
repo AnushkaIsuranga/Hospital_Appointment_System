@@ -100,6 +100,8 @@ public class Appointment {
         this.isCanceled = setCanceled;
     }
 
+
+
     public void updateFrom(Appointment newAppointment) {
         this.patientIndex = newAppointment.getPatientIndex();
         this.patientName = newAppointment.getPatientName();

@@ -6,6 +6,8 @@ import Dashboard from './components/Dashboard/Dashboard.jsx'
 import EditAppointment from './components/UpdateAppointment.jsx'
 import AddAppointment from './components/AddAppointment.jsx'
 import GeneratReport from './components/Dashboard/GenerateReport.jsx';
+import DoctorRegister from './components/Register/DoctorRegister.jsx';
+import UserRegister from './components/Register/UserRegister.jsx';
 
 function App() {
   return (
@@ -18,7 +20,8 @@ function App() {
           <Route path='/appointment-dash' element={<Dashboard/>} />
           <Route path='/add-appointment' element={<AddAppointment/>} />
           <Route path="/edit-appointment/:id" element={<EditAppointment />} />
-
+          <Route path="/register-doctor" element={<DoctorRegister />} />
+          <Route path="/register-user" element={<UserRegister />} />
         </Routes>
       </BrowserRouter>
     </>
