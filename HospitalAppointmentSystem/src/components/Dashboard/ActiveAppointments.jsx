@@ -269,19 +269,19 @@ const ActiveAppointments = () => {
                   <td className="px-6 py-4 whitespace-nowrap text-center text-sm font-medium space-x-2">
                     <button
                       onClick={() => handleEdit(appointment.id)}
-                      className="text-indigo-600 hover:text-indigo-900 focus:outline-none"
+                      className="text-indigo-600 transition-colors duration-300 hover:text-indigo-900 focus:outline-none"
                     >
                       Edit
                     </button>
                     <button
                       onClick={() => handleDelete(appointment.id)}
-                      className="text-red-600 hover:text-red-900 focus:outline-none"
+                      className="text-red-600 hover:text-red-900 transition-colors duration-300 focus:outline-none"
                     >
                       Delete
                     </button>
                     <button
                       onClick={() => handleCancel(appointment.id)}
-                      className="text-yellow-600 hover:text-yellow-900 focus:outline-none"
+                      className="text-yellow-600 transition-colors duration-300 hover:text-yellow-900 focus:outline-none"
                     >
                       Cancel
                     </button>

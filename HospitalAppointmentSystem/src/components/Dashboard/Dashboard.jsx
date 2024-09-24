@@ -6,7 +6,6 @@ import ActiveAppointments from './ActiveAppointments';
 import CanceledAppointments from './CanceledAppointments';
 import Statistics from './Statistics';
 import GenerateReport from './GenerateReport';
-import DoctorRegister from '../Register/DoctorRegister';
 
 function Dashboard() {
     // State for active and canceled appointments
@@ -14,6 +13,8 @@ function Dashboard() {
     const [canceledAppointments, setCanceledAppointments] = useState([]);
     const [error, setError] = useState(''); // State for handling errors
     const [activeTab, setActiveTab] = useState('active'); // State to toggle between active and canceled appointments
+    const [isAuthenticated, setIsAuthenticated] = useState(localStorage.getItem('isAuthenticated') === 'true');
+    const [role, setRole] = useState(localStorage.getItem('role'));
 
     // Effect hook to load appointments on component mount
     useEffect(() => {
@@ -21,6 +22,40 @@ function Dashboard() {
     }, []);
 
     const navigate = useNavigate();
+
+    // Ensure this is at the top of your component code
+
+    // Effect for checking authentication
+    useEffect(() => {
+        const checkAuthentication = () => {
+            const storedIsAuthenticated = localStorage.getItem('isAuthenticated');
+            const storedRole = localStorage.getItem('role');
+
+            console.log('Checking Authentication:', {
+                storedIsAuthenticated,
+                storedRole,
+            });
+
+            if (storedIsAuthenticated !== 'true' || storedRole !== 'admin') {
+                navigate('/login-dash');
+                
+            } else {
+                setIsAuthenticated(true);
+                setRole(storedRole);
+            }
+        };
+
+        checkAuthentication();
+    }, [navigate]);
+
+    const handleLogout = () => {
+        // Clear the authentication state from local storage
+        localStorage.removeItem('isAuthenticated');
+        localStorage.removeItem('role');
+        
+        // Redirect to the login page
+        navigate('/login-dash'); // Change this to your login route
+    };
 
     const doctorRegister = (e) => {
         e.preventDefault();
@@ -83,16 +118,22 @@ function Dashboard() {
                 <h1 className="text-4xl text-white font-bold mb-2">Dashboard</h1>
                 <div className='space-x-6'>
                     <button 
-                        className="bg-blue-500 text-white py-2 px-4 rounded-lg hover:bg-blue-600 transition-colors duration-300 focus:outline-none focus:ring-2 focus:ring-blue-300"
+                        className="bg-blue-500 text-white py-2 px-4 rounded-lg hover:bg-blue-600 hover:font-bold transition-all duration-300 w-40 focus:outline-none focus:ring-2 focus:ring-blue-300"
                         onClick={generatePDF}
                     >
                         Generate Report 
                     </button>
                     <button 
-                        className="bg-blue-500 text-white py-2 px-4 rounded-lg hover:bg-blue-600 transition-colors duration-300 focus:outline-none focus:ring-2 focus:ring-blue-300"
+                        className="bg-blue-500 text-white py-2 px-4 rounded-lg hover:bg-blue-600 hover:font-bold transition-all duration-300 w-40 focus:outline-none focus:ring-2 focus:ring-blue-300"
                         onClick={doctorRegister}
                     >
                         Register Doctor
+                    </button>
+                    <button 
+                        onClick={handleLogout} 
+                        className="bg-red-500 hover:bg-red-800 hover:font-bold transition-all duration-300 text-white w-24 px-4 py-2 rounded"
+                    >
+                        Logout
                     </button>
                 </div>
             </div>
