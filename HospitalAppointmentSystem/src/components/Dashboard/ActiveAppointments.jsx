@@ -2,20 +2,13 @@
 import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import AppointmentService from '../../services/appointmentService';
-import mergeSort from '../../services/mergeSort'
-
-// Predefined list of doctors and their available time slots
-const doctors = {
-  "Dr. Smith": ["9am - 10am", "11am - 12pm", "2pm - 3pm"],
-  "Dr. Johnson": ["10am - 11am", "1pm - 2pm", "3pm - 4pm"],
-  "Dr. Williams": ["8am - 9am", "12pm - 1pm", "4pm - 5pm"]
-};
+import mergeSort from '../../services/mergeSort';
 
 const ActiveAppointments = () => {
   // State variables for managing appointments and filters
   const [appointments, setAppointments] = useState([]);
   const [filteredAppointments, setFilteredAppointments] = useState([]);
-  const [doctorsList, setDoctorsList] = useState(Object.keys(doctors));
+  const [doctorsList, setDoctorsList] = useState([]);
   const [timeSlots, setTimeSlots] = useState([]);
   const [selectedDoctor, setSelectedDoctor] = useState('');
   const [selectedTimeSlot, setSelectedTimeSlot] = useState('');
@@ -27,81 +20,44 @@ const ActiveAppointments = () => {
 
   const navigate = useNavigate();
 
+  // Fetch doctors and appointments on component mount
   useEffect(() => {
+    const fetchDoctors = async () => {
+      try {
+        const response = await AppointmentService.getDoctors();
+        setDoctorsList(response.data); // Assuming this returns a list of doctor names
+      } catch (error) {
+        console.error('Error fetching doctors:', error);
+      }
+    };
+
     const fetchAppointments = async () => {
       try {
-        // Fetching active appointments from the service
         const response = await AppointmentService.getActiveAppointments();
-        // Sorting appointments using merge sort
         const sortedAppointments = mergeSort(response.data);
 
         setAppointments(sortedAppointments);
         setFilteredAppointments(sortedAppointments);
-
-        // Extract unique time slots based on the selected doctor
-        updateTimeSlots(selectedDoctor);
       } catch (error) {
         console.error('Error fetching active appointments:', error);
       }
     };
 
-    // Merge sort function for sorting appointments
-    const mergeSort = (array) => {
-      if (array.length <= 1) return array;
-
-      const mid = Math.floor(array.length / 2);
-      const left = array.slice(0, mid);
-      const right = array.slice(mid);
-
-      return merge(mergeSort(left), mergeSort(right));
-    };
-
+    fetchDoctors();
     fetchAppointments();
+
     // Set an interval to fetch appointments every minute
     const interval = setInterval(fetchAppointments, 60000);
     return () => clearInterval(interval);
-  }, [selectedDoctor]);
-
-  // Merge function used in merge sort
-  const merge = (left, right) => {
-    let result = [];
-    let leftIndex = 0;
-    let rightIndex = 0;
-
-    while (leftIndex < left.length && rightIndex < right.length) {
-      const dateA = new Date(left[leftIndex].appointmentDate);
-      const dateB = new Date(right[rightIndex].appointmentDate);
-
-      // Compare appointment dates and then patient indexes
-      if (dateA < dateB) {
-        result.push(left[leftIndex]);
-        leftIndex++;
-      } else if (dateA > dateB) {
-        result.push(right[rightIndex]);
-        rightIndex++;
-      } else {
-        const indexA = parseInt(left[leftIndex].patientIndex.split('-')[1], 10);
-        const indexB = parseInt(right[rightIndex].patientIndex.split('-')[1], 10);
-
-        if (indexA > indexB) {
-          result.push(left[leftIndex]);
-          leftIndex++;
-        } else {
-          result.push(right[rightIndex]);
-          rightIndex++;
-        }
-      }
-    }
-
-    return result.concat(left.slice(leftIndex)).concat(right.slice(rightIndex));
-  };
+  }, []);
 
   // Function to update available time slots based on the selected doctor
-  const updateTimeSlots = (doctor) => {
-    if (doctor) {
-      setTimeSlots(doctors[doctor]);
-    } else {
-      setTimeSlots([]);
+  const updateTimeSlots = async (doctor) => {
+    try {
+      const response = await AppointmentService.getTimeSlotsByDoctor(doctor); // Assuming this returns time slots for the doctor
+      setTimeSlots(response.data);
+    } catch (error) {
+      console.error('Error fetching time slots:', error);
     }
   };
 
@@ -190,9 +146,9 @@ const ActiveAppointments = () => {
     <div className="p-4 ml-10 mr-10 mb-10">
       <div className="mb-4">
         <h1 className="text-xl font-bold mb-2 cursor-default">Filter Appointments</h1>
-        <div className='grid grid-cols-4 gap-10'>
+        <div className='grid sm:grid-cols-4 gap-10'>
           {/* Dropdown to select a doctor */}
-          <div className="mb-2">
+          <div className="sm:mb-2">
             <label className="block text-sm font-medium mb-1">Doctor:</label>
             <select
               onChange={handleDoctorChange}
@@ -206,7 +162,7 @@ const ActiveAppointments = () => {
             </select>
           </div>
           {/* Dropdown to select a time slot */}
-          <div className="mb-2">
+          <div className="sm:mb-2">
             <label className="block text-sm font-medium mb-1">Time Slot:</label>
             <select
               onChange={(e) => setSelectedTimeSlot(e.target.value)}
@@ -220,7 +176,7 @@ const ActiveAppointments = () => {
             </select>
           </div>
           {/* Date picker for selecting the appointment date */}
-          <div className="mb-4">
+          <div className="sm:mb-4">
             <label className="block text-sm font-medium mb-1">Date:</label>
             <input
               type="date"
@@ -260,30 +216,30 @@ const ActiveAppointments = () => {
             ) : (
               filteredAppointments.map((appointment) => (
                 <tr key={appointment.id}>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">{appointment.id}</td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{appointment.patientIndex}</td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{appointment.patientName}</td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{appointment.doctorName}</td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{appointment.appointmentDate}</td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{appointment.appointmentTime}</td>
-                  <td className="px-6 py-4 whitespace-nowrap text-center text-sm font-medium space-x-2">
+                  <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">{appointment.id ?? 'N/A'}</td>
+                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{appointment.patientIndex}</td>
+                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{appointment.patientName}</td>
+                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{appointment.doctorName}</td>
+                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{appointment.appointmentDate}</td>
+                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{appointment.appointmentTime}</td>
+                  <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-center">
                     <button
                       onClick={() => handleEdit(appointment.id)}
-                      className="text-indigo-600 transition-colors duration-300 hover:text-indigo-900 focus:outline-none"
+                      className="bg-yellow-300 px-3 py-1 rounded-md mr-2 hover:bg-yellow-400 transition-colors"
                     >
                       Edit
                     </button>
                     <button
-                      onClick={() => handleDelete(appointment.id)}
-                      className="text-red-600 hover:text-red-900 transition-colors duration-300 focus:outline-none"
-                    >
-                      Delete
-                    </button>
-                    <button
                       onClick={() => handleCancel(appointment.id)}
-                      className="text-yellow-600 transition-colors duration-300 hover:text-yellow-900 focus:outline-none"
+                      className="bg-red-400 text-white px-3 py-1 rounded-md mr-2 hover:bg-red-500 transition-colors"
                     >
                       Cancel
+                    </button>
+                    <button
+                      onClick={() => handleDelete(appointment.id)}
+                      className="bg-red-600 text-white px-3 py-1 rounded-md hover:bg-red-700 transition-colors"
+                    >
+                      Delete
                     </button>
                   </td>
                 </tr>
@@ -293,17 +249,17 @@ const ActiveAppointments = () => {
         </table>
       </div>
 
-      {/* Alert for canceled appointment */}
+      {/* Success alert for canceling an appointment */}
       {showAlertCancel && (
-        <div className="fixed bottom-4 right-4 bg-yellow-500 text-white px-4 py-2 rounded-md">
-          Appointment {canceledAppointmentId} has been canceled successfully!
+        <div className="bg-blue-500 text-white px-4 py-2 rounded-md mt-4 fixed bottom-10 right-10 shadow-md">
+          <p>Appointment with ID {canceledAppointmentId} has been canceled!</p>
         </div>
       )}
-
-      {/* Alert for deleted appointment */}
+      
+      {/* Success alert for deleting an appointment */}
       {showAlertDelete && (
-        <div className="fixed bottom-4 right-4 bg-red-500 text-white px-4 py-2 rounded-md">
-          Appointment {deletedAppointmentId} has been deleted successfully!
+        <div className="bg-blue-500 text-white px-4 py-2 rounded-md mt-4 fixed bottom-10 right-10 shadow-md">
+          <p>Appointment with ID {deletedAppointmentId} has been deleted!</p>
         </div>
       )}
     </div>

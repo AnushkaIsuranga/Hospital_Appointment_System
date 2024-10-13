@@ -74,4 +74,18 @@ public class doctorController {
         Long totalDoctors = doctorService.getTotalDoctors();
         return ResponseEntity.ok(totalDoctors);
     }
+
+    // Find doctor by NIC
+    @GetMapping("/{nic}")
+    public ResponseEntity<Doctor> getDoctorByNic(@PathVariable String nic) {
+        Optional<Doctor> doctor = doctorService.findDoctorByNic(nic);
+        return doctor.map(ResponseEntity::ok).orElseGet(() -> ResponseEntity.notFound().build());
+    }
+
+    // Find doctor by email
+    @GetMapping("/{email}")
+    public ResponseEntity<Doctor> getDoctorByEmail(@PathVariable String email) {
+        Optional<Doctor> doctor = doctorService.findDoctorByEmail(email);
+        return doctor.map(ResponseEntity::ok).orElseGet(() -> ResponseEntity.notFound().build());
+    }
 }

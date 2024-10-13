@@ -9,6 +9,7 @@ const DoctorRegister = () => {
         specialization: "",
         doctorEmail: "",
         doctorMobile: "",
+        nic: "",
         timeSlots: [],
     });
 
@@ -58,7 +59,7 @@ const DoctorRegister = () => {
         doctorService.saveDoctor(formattedDoctor)
             .then((response) => {
                 console.log('Doctor registered successfully:', response.data);
-                navigate("/appointment-dash");
+                navigate("/dashboard");
             })
             .catch((error) => {
                 console.error('Error registering doctor:', error.response ? error.response.data : error.message);
@@ -156,6 +157,17 @@ const DoctorRegister = () => {
                             value={doctor.doctorEmail}
                             onChange={handleChange}
                             className="border-2 border-gray-300 w-full sm:w-full h-8 rounded-lg p-4 transition-colors duration-300 focus:outline-none focus:border-cyan-400"
+                        />
+                    </div>
+                    <div className="flex gap-6 p-2 items-center">
+                        <label className="pr-3 text-gray-600">NIC</label>
+                        <input
+                            type="text"
+                            name="nic"
+                            value={doctor.nic}
+                            onChange={handleChange}
+                            className="border-2 border-gray-300 w-full sm:w-full h-8 rounded-lg p-4 transition-colors duration-300 focus:outline-none focus:border-cyan-400"
+                            required
                         />
                     </div>
                     <div className="flex gap-6 p-2 items-center">

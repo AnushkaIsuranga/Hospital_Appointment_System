@@ -7,7 +7,6 @@ import EditAppointment from './components/UpdateAppointment.jsx'
 import AddAppointment from './components/AddAppointment.jsx'
 import GeneratReport from './components/Dashboard/GenerateReport.jsx';
 import DoctorRegister from './components/Register/DoctorRegister.jsx';
-import UserRegister from './components/Register/UserRegister.jsx';
 import DashLogin from './components/DashLogin.jsx';
 import ProtectedRoute from './services/ProtectedRoute.jsx';
 
@@ -19,11 +18,12 @@ function App() {
           <Route index element={<HomePage/>} />
           <Route path='/home' element={<HomePage/>} />
           <Route path='/report' element={<GeneratReport/>} />
-          <ProtectedRoute path='/appointment-dash' element={<Dashboard/>} />
+          <Route element={<ProtectedRoute allowedRole="admin" />}>
+              <Route path="/dashboard" element={<Dashboard />} />
+          </Route>
           <Route path='/add-appointment' element={<AddAppointment/>} />
           <Route path="/edit-appointment/:id" element={<EditAppointment />} />
           <Route path="/register-doctor" element={<DoctorRegister />} />
-          <Route path="/register-user" element={<UserRegister />} />
           <Route path="/login-dash" element={<DashLogin />} />
         </Routes>
       </BrowserRouter>

@@ -2,58 +2,102 @@ package nibm.hdse241.hospitalappointmentsystem.services;
 
 import nibm.hdse241.hospitalappointmentsystem.dto.appointmentDTO;
 import nibm.hdse241.hospitalappointmentsystem.entities.Appointment;
+import nibm.hdse241.hospitalappointmentsystem.entities.User;
 import nibm.hdse241.hospitalappointmentsystem.repositories.appointmentRepository;
+import nibm.hdse241.hospitalappointmentsystem.repositories.userRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
+import org.springframework.web.bind.annotation.ExceptionHandler;
 
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Stack;
 import java.util.stream.Collectors;
 
-@Service // Marks this class as a service component
+@Service
 public class appointmentService {
 
-    @Autowired // Automatically injects the appointmentRepository bean
+    @Autowired
     private appointmentRepository appointmentRepository;
 
-    // Stack to manage canceled appointments
+    @Autowired
+    private userRepository userRepository;
+
     private Stack<Appointment> canceledAppointmentsStack = new Stack<>();
 
-    // Create a new appointment
     public Appointment createAppointment(appointmentDTO appointmentDTO) {
+
+        User user = new User();
+        user.setFullName(appointmentDTO.getPatientName());
+        user.setPhone(appointmentDTO.getPatientMobile());
+        user.setEmail(appointmentDTO.getPatientEmail());
+        user.setBirthday(appointmentDTO.getBirthday());
+        user.setNic(appointmentDTO.getNic());
+        user.setRegistrationDate(LocalDateTime.now());
+
+        // Save the user entity to the database
+        userRepository.save(user);
+
         Appointment appointment = new Appointment();
-        // Convert DTO to Entity
         appointment.setPatientIndex(appointmentDTO.getPatientIndex());
         appointment.setPatientName(appointmentDTO.getPatientName());
-        appointment.setDoctorName(appointmentDTO.getDoctorName());
         appointment.setPatientMobile(appointmentDTO.getPatientMobile());
         appointment.setPatientEmail(appointmentDTO.getPatientEmail());
+        appointment.setDoctorName(appointmentDTO.getDoctorName());
         appointment.setAppointmentTime(appointmentDTO.getAppointmentTime());
         appointment.setAppointmentDate(appointmentDTO.getAppointmentDate());
-        appointment.setCanceled(false);
+        appointment.setCanceled(appointmentDTO.isAppointmentStatus());
+        appointment.setNic(appointmentDTO.getNic());
+        appointment.setBirthday(appointmentDTO.getBirthday());
+        appointment.setUser(user);
+
+        // Save the appointment entity
         return appointmentRepository.save(appointment);
     }
 
-    // Get all appointments
+    public ResponseEntity<Appointment> updateAppointment(int id, appointmentDTO appointmentDTO) {
+        Optional<Appointment> existingAppointment = appointmentRepository.findById(id);
+        if (existingAppointment.isPresent()) {
+            Appointment appointment = existingAppointment.get();
+
+            // Update linked user details
+            User user = appointment.getUser();
+            user.setFullName(appointmentDTO.getPatientName());
+            user.setPhone(appointmentDTO.getPatientMobile());
+            user.setEmail(appointmentDTO.getPatientEmail());
+            userRepository.save(user);
+
+            // Update appointment details
+            appointment.setPatientIndex(appointmentDTO.getPatientIndex());
+            appointment.setPatientName(appointmentDTO.getPatientName());
+            appointment.setDoctorName(appointmentDTO.getDoctorName());
+            appointment.setPatientMobile(appointmentDTO.getPatientMobile());
+            appointment.setPatientEmail(appointmentDTO.getPatientEmail());
+            appointment.setAppointmentTime(appointmentDTO.getAppointmentTime());
+            appointment.setAppointmentDate(appointmentDTO.getAppointmentDate());
+
+            return new ResponseEntity<>(appointmentRepository.save(appointment), HttpStatus.OK);
+        } else {
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+        }
+    }
+
     public List<Appointment> getAllAppointments() {
         return appointmentRepository.findAll();
     }
 
-    // Get active appointments (i.e., not canceled)
     public List<Appointment> getActiveAppointments() {
         return appointmentRepository.findByIsCanceledFalse();
     }
 
-    // Get canceled appointments
     public List<Appointment> getCanceledAppointments() {
         return appointmentRepository.findByIsCanceledTrue();
     }
 
-    // Get an appointment by ID
     public ResponseEntity<Appointment> getAppointmentById(int id) {
         Optional<Appointment> appointment = appointmentRepository.findById(id);
         if (appointment.isPresent()) {
@@ -63,25 +107,6 @@ public class appointmentService {
         }
     }
 
-    // Update an existing appointment by ID
-    public ResponseEntity<Appointment> updateAppointment(int id, appointmentDTO appointmentDTO) {
-        Optional<Appointment> existingAppointment = appointmentRepository.findById(id);
-        if (existingAppointment.isPresent()) {
-            Appointment appointment = existingAppointment.get();
-            appointment.setPatientIndex(appointmentDTO.getPatientIndex());
-            appointment.setPatientName(appointmentDTO.getPatientName());
-            appointment.setDoctorName(appointmentDTO.getDoctorName());
-            appointment.setPatientMobile(appointmentDTO.getPatientMobile());
-            appointment.setPatientEmail(appointmentDTO.getPatientEmail());
-            appointment.setAppointmentTime(appointmentDTO.getAppointmentTime());
-            appointment.setAppointmentDate(appointmentDTO.getAppointmentDate());
-            return new ResponseEntity<>(appointmentRepository.save(appointment), HttpStatus.OK);
-        } else {
-            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
-        }
-    }
-
-    // Delete an appointment by ID
     public ResponseEntity<HttpStatus> deleteAppointment(int id) {
         Optional<Appointment> appointment = appointmentRepository.findById(id);
         if (appointment.isPresent()) {
@@ -92,7 +117,6 @@ public class appointmentService {
         }
     }
 
-    // Cancel an appointment by ID
     public ResponseEntity<Appointment> cancelAppointment(int id) {
         Optional<Appointment> appointment = appointmentRepository.findById(id);
         if (appointment.isPresent()) {
@@ -106,7 +130,6 @@ public class appointmentService {
         }
     }
 
-    // Revive a canceled appointment by ID
     public ResponseEntity<Appointment> reviveAppointment(int id) {
         Optional<Appointment> appointment = appointmentRepository.findById(id);
         if (appointment.isPresent()) {
@@ -123,7 +146,6 @@ public class appointmentService {
         }
     }
 
-    // Replace an existing appointment with a new one
     public ResponseEntity<Appointment> replaceAppointment(Appointment newAppointment) {
         Optional<Appointment> existingAppointment = appointmentRepository.findById(newAppointment.getId());
         if (existingAppointment.isPresent()) {
@@ -141,24 +163,19 @@ public class appointmentService {
         }
     }
 
-    // Get appointments by date and time
     public List<Appointment> getAppointmentsByDateAndTime(String appointmentDate, String appointmentTime) {
         return appointmentRepository.findByAppointmentDateAndAppointmentTime(appointmentDate.trim(), appointmentTime.trim());
     }
 
-    // Get the total number of appointments
     public Long getTotalAppointments() {
         return appointmentRepository.count();
     }
 
-    // Get the number of active appointments grouped by doctor
     public Map<String, Long> getAppointmentsByDoctor() {
-            // Logic to group appointments by doctor
-            return appointmentRepository.findAll().stream()
-                    .collect(Collectors.groupingBy(Appointment::getDoctorName, Collectors.counting()));
-        }
+        return appointmentRepository.findAll().stream()
+                .collect(Collectors.groupingBy(Appointment::getDoctorName, Collectors.counting()));
+    }
 
-    // Get the number of all appointments grouped by time slot
     public Map<String, Long> getAppointmentsByTimeSlot() {
         return appointmentRepository.findAll().stream()
                 .collect(Collectors.groupingBy(
@@ -167,20 +184,16 @@ public class appointmentService {
                 ));
     }
 
-    // Get the count of canceled appointments
     public Long getCanceledAppointmentsCount() {
         return appointmentRepository.countByIsCanceledTrue();
     }
 
-    // Get the number of active appointments grouped by doctor
     public Map<String, Long> getActiveAppointmentsByDoctor() {
-        // Logic to group appointments by doctor
         return appointmentRepository.findAll().stream()
                 .filter(appointment -> !appointment.isCanceled())
                 .collect(Collectors.groupingBy(Appointment::getDoctorName, Collectors.counting()));
     }
 
-    // Get the number of active appointments grouped by time slot
     public Map<String, Long> getActiveAppointmentsByTimeSlot() {
         return appointmentRepository.findAll().stream()
                 .filter(appointment -> !appointment.isCanceled())
@@ -190,15 +203,12 @@ public class appointmentService {
                 ));
     }
 
-    // Get the number of canceled appointments grouped by doctor
     public Map<String, Long> getCanceledAppointmentsByDoctor() {
-        // Logic to group appointments by doctor
         return appointmentRepository.findAll().stream()
                 .filter(appointment -> appointment.isCanceled())
                 .collect(Collectors.groupingBy(Appointment::getDoctorName, Collectors.counting()));
     }
 
-    // Get the number of canceled appointments grouped by time slot
     public Map<String, Long> getCanceledAppointmentsByTimeSlot() {
         return appointmentRepository.findAll().stream()
                 .filter(appointment -> appointment.isCanceled())
@@ -206,5 +216,10 @@ public class appointmentService {
                         appointment -> appointment.getAppointmentTime(),
                         Collectors.counting()
                 ));
+    }
+
+    @ExceptionHandler(RuntimeException.class)
+    public ResponseEntity<String> handleDuplicateAppointment(RuntimeException ex) {
+        return ResponseEntity.badRequest().body(ex.getMessage());
     }
 }

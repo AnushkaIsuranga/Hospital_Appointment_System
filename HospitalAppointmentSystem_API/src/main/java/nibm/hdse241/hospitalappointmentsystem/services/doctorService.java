@@ -53,6 +53,16 @@ public class doctorService {
     public List<Doctor> getDoctorsByTimeSlot(String timeSlot) {
         return doctorRepository.findByTimeSlotsContaining(timeSlot);
     }
+    // Find doctor by email
+    public Optional<Doctor> findDoctorByEmail(String email) {
+        return doctorRepository.findByEmail(email);
+    }
+
+    // Find doctor by NIC
+    public Optional<Doctor> findDoctorByNic(String nic) {
+        return doctorRepository.findByNic(nic);
+    }
+
 
     // Get the total number of doctors
     public Long getTotalDoctors() {

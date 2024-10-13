@@ -12,6 +12,7 @@ const Services = () => {
             <li className='m-1 text-lg text-slate-700 font-semibold hover:text-cyan-500 transition-colors duration-300'>Cardiology</li>
             <li className='m-1 text-lg text-slate-700 font-semibold hover:text-cyan-500 transition-colors duration-300'>Pediatrics</li>
             <li className='m-1 text-lg text-slate-700 font-semibold hover:text-cyan-500 transition-colors duration-300'>Neurology</li>
+            <li className='m-1 text-lg text-slate-700 font-semibold hover:text-cyan-500 transition-colors duration-300'>And More!</li>
           </ul>
         </div>
         <div className='flex-1 hidden bg-no-repeat md:block h-[300px] w-full rounded-lg shadow-lg' style={{backgroundImage: `url(${Image})`, backgroundSize: 'cover', backgroundPosition: 'center',}}></div>

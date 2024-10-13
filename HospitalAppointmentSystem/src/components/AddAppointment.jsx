@@ -4,14 +4,18 @@ import DatePicker from 'react-datepicker';
 import sendAppointmentEmail from '../services/emailService';
 import 'react-datepicker/dist/react-datepicker.css';
 import appointmentService from '../services/appointmentService';
-import doctorService from '../services/doctorService'; // Import the doctor service
+import doctorService from '../services/doctorService';
+import userService from '../services/userService'; // Import userService
 import background from '../assets/image4.jpg';
 
 const AddAppointment = () => {
     const [appointment, setAppointment] = useState({
         doctorName: "",
+        patientName: "",
         patientMobile: "",
         patientEmail: "",
+        nic: "",
+        birthday: "",  // Added patientBirthday field
         appointmentTime: "",
         appointmentDate: "",
         patientIndex: "", 
@@ -20,7 +24,10 @@ const AddAppointment = () => {
 
     const [timeSlots, setTimeSlots] = useState([]);
     const [selectedDate, setSelectedDate] = useState(null);
+    const [selectedBirthday, setSelectedBirthday] = useState(null);  // Added selectedBirthday state
     const [showAlert, setShowAlert] = useState(false);
+    const [nicError, setNicError] = useState('');  // State to store NIC-related errors
+    const [runtimeError, setRuntimeError] = useState(''); // State to handle runtime errors
     const [doctors, setDoctors] = useState([]); // State for doctors
     const navigate = useNavigate();
 
@@ -43,6 +50,16 @@ const AddAppointment = () => {
             });
     }, []);
 
+    // Function to generate the patient index based on the appointment time slot
+    const getNextIndex = (existingCount, appointmentTime) => {
+        const [time, period] = appointmentTime.split(' '); 
+        const hour = parseInt(time.split(':')[0]); 
+        const slotNumber = hour > 12 ? hour - 12 : hour; 
+        const paddedCount = String(existingCount).padStart(2, '0'); 
+        return `P${slotNumber}-${paddedCount}`;
+    };
+
+    // Update patient index based on appointment date and time
     useEffect(() => {
         if (appointment.appointmentDate && appointment.appointmentTime) {
             appointmentService.getAppointmentsByDateAndTime(appointment.appointmentDate, appointment.appointmentTime)
@@ -66,9 +83,8 @@ const AddAppointment = () => {
             patientIndex: ""
         }));
         
-        // Find the selected doctor from the fetched doctors
         const doctor = doctors.find(doc => doc.name === selectedDoctor);
-        setTimeSlots(doctor ? doctor.timeSlots : []); // Update available time slots
+        setTimeSlots(doctor ? doctor.timeSlots : []); 
     };
 
     const handleChange = (e) => {
@@ -81,39 +97,203 @@ const AddAppointment = () => {
         setAppointment((prev) => ({ ...prev, appointmentDate: date.toISOString().split('T')[0] }));
     };
 
+    const handleBirthdayChange = (date) => {
+        setSelectedBirthday(date);
+        setAppointment((prev) => ({ ...prev, birthday: date.toISOString().split('T')[0] }));
+    };
+
+    useEffect(() => {
+        const checkUserByNIC = async () => {
+            if (appointment.nic) {
+                try {
+                    const response = await userService.getUserByNic(appointment.nic);
+                    if (response.data) {
+                        const user = response.data;
+                        if (
+                            user.fullName !== appointment.patientName ||
+                            user.email !== appointment.patientEmail ||
+                            user.phone !== appointment.patientMobile ||
+                            user.birthday !== appointment.birthday
+                        ) {
+                            setNicError('Personal data mismatch for the provided NIC!');
+                        } else {
+                            setNicError('');
+                        }
+                    } else {
+                        setNicError('');
+                    }
+                } catch (error) {
+                    setNicError('');
+                }
+            } else {
+                setNicError('');
+            }
+        };
+
+        checkUserByNIC();
+    }, [appointment.nic, appointment.patientName, appointment.patientEmail, appointment.patientMobile, appointment.birthday]);
+
     const addAppointment = (e) => {
         e.preventDefault();
-        if (!appointment.patientName || !appointment.doctorName || !appointment.patientMobile || !appointment.patientEmail || !appointment.appointmentTime || !appointment.appointmentDate) {
+    
+        // Check for required fields
+        if (
+            !appointment.patientName ||
+            !appointment.doctorName ||
+            !appointment.patientMobile ||
+            !appointment.patientEmail ||
+            !appointment.nic ||
+            !appointment.birthday ||
+            !appointment.appointmentTime ||
+            !appointment.appointmentDate
+        ) {
+            setRuntimeError('Please fill in all required fields!');
             setShowAlert(true);
             setTimeout(() => {
                 setShowAlert(false);
             }, 5000);
             return;
         }
-
-        const newAppointment = { ...appointment, isCanceled: false };
-        appointmentService.saveAppointment(newAppointment)
-            .then(async (response) => {
-                try {
-                    await sendAppointmentEmail({ ...newAppointment, id: response.data.id });
-                    navigate("/home");
-                } catch (error) {
-                    console.error('Error sending email:', error);
+    
+        // If NIC exists, fetch user data
+        userService.getUserByNic(appointment.nic)
+            .then(response => {
+                const user = response.data;
+    
+                // If user data exists
+                if (user) {
+                    // Check for data mismatch
+                    if (
+                        user.fullName !== appointment.patientName ||
+                        user.email !== appointment.patientEmail ||
+                        user.phone !== appointment.patientMobile ||
+                        user.birthday !== appointment.birthday
+                    ) {
+                        // Data mismatch, prevent adding the appointment
+                        setRuntimeError('Personal data mismatch for the provided NIC!');
+                        setShowAlert(true);
+                        setTimeout(() => {
+                            setShowAlert(false);
+                        }, 5000);
+                        return; // Prevent further execution if there is a mismatch
+                    }
+    
+                    // Data matches, proceed to add the appointment
+                    const newAppointment = { ...appointment, isCanceled: false };
+                    appointmentService.saveAppointment(newAppointment)
+                        .then(async (response) => {
+                            try {
+                                await sendAppointmentEmail({ ...newAppointment, id: response.data.id });
+                                navigate("/home");
+                            } catch (error) {
+                                console.error('Error sending email:', error);
+                            }
+                        })
+                        .catch((error) => {
+                            console.error('Error adding appointment:', error);
+                            setRuntimeError('An unexpected error occurred while adding the appointment.');
+                            setShowAlert(true);
+                            setTimeout(() => {
+                                setShowAlert(false);
+                            }, 5000);
+                        });
+                } else {
+                    // NIC does not exist, proceed to add the appointment and register the new user
+                    const newUser = {
+                        fullName: appointment.patientName,
+                        email: appointment.patientEmail,
+                        phone: appointment.patientMobile,
+                        birthday: appointment.birthday,
+                        nic: appointment.nic
+                    };
+    
+                    // Register the new user (make sure you have a service to handle this)
+                    userService.registerUser(newUser)  // Assuming you have a method for registering users
+                        .then(() => {
+                            // After user registration, proceed to save the appointment
+                            const newAppointment = { ...appointment, isCanceled: false };
+                            appointmentService.saveAppointment(newAppointment)
+                                .then(async (response) => {
+                                    try {
+                                        await sendAppointmentEmail({ ...newAppointment, id: response.data.id });
+                                        navigate("/home");
+                                    } catch (error) {
+                                        console.error('Error sending email:', error);
+                                    }
+                                })
+                                .catch((error) => {
+                                    console.error('Error adding appointment:', error);
+                                    setRuntimeError('An unexpected error occurred while adding the appointment.');
+                                    setShowAlert(true);
+                                    setTimeout(() => {
+                                        setShowAlert(false);
+                                    }, 5000);
+                                });
+                        })
+                        .catch((error) => {
+                            console.error('Error registering user:', error);
+                            setRuntimeError('An unexpected error occurred while registering the user.');
+                            setShowAlert(true);
+                            setTimeout(() => {
+                                setShowAlert(false);
+                            }, 5000);
+                        });
                 }
             })
             .catch((error) => {
-                console.error('Error adding appointment:', error);
+                console.error('Error fetching user by NIC:', error);
+                // Proceed to add the appointment and register the new user
+                const newUser = {
+                    fullName: appointment.patientName,
+                    email: appointment.patientEmail,
+                    phone: appointment.patientMobile,
+                    birthday: appointment.birthday,
+                    nic: appointment.nic
+                };
+    
+                // Register the new user
+                userService.registerUser(newUser)
+                    .then(() => {
+                        // After user registration, proceed to save the appointment
+                        const newAppointment = { ...appointment, isCanceled: false };
+                        appointmentService.saveAppointment(newAppointment)
+                            .then(async (response) => {
+                                try {
+                                    await sendAppointmentEmail({ ...newAppointment, id: response.data.id });
+                                    navigate("/home");
+                                } catch (error) {
+                                    console.error('Error sending email:', error);
+                                }
+                            })
+                            .catch((error) => {
+                                console.error('Error adding appointment:', error);
+                                setRuntimeError('An unexpected error occurred while adding the appointment.');
+                                setShowAlert(true);
+                                setTimeout(() => {
+                                    setShowAlert(false);
+                                }, 5000);
+                            });
+                    })
+                    .catch((error) => {
+                        console.error('Error registering user:', error);
+                        setRuntimeError('An unexpected error occurred while registering the user.');
+                        setShowAlert(true);
+                        setTimeout(() => {
+                            setShowAlert(false);
+                        }, 5000);
+                    });
             });
     };
-
+    
+    
     const back = (e) => {
         e.preventDefault();
-        navigate(`/home`)
+        navigate(`/home`);
     };
 
     return (
         <div className="display" style={backgroundStyle}>
-            <div className="border-solid w-full h-full shadow-0 border-0 rounded-3xl p-6 sm:border-2 sm:w-[600px] sm:h-auto sm:shadow-xl bg-white bg-opacity-75 hover-scale-none transition-transform sm:hover-scale-up">
+            <div className="border-solid w-full h-full shadow-0 border-0 sm:rounded-3xl p-6 sm:border-2 sm:w-[600px] sm:h-auto sm:shadow-xl bg-white bg-opacity-75 hover-scale-none transition-transform sm:hover-scale-up">
                 <h1 className="text-cyan-400 text-4xl font-semibold text-center mb-4">Add New Appointment</h1>
                 <form onSubmit={addAppointment}>
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-6 p-2">
@@ -164,32 +344,47 @@ const AddAppointment = () => {
                             className="border-2 border-gray-300 w-full sm:w-full h-8 rounded-lg p-4 transition-colors duration-300 focus:outline-none focus:border-cyan-400"
                         />
                     </div>
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6 p-2">
-                        <div>
-                            <label className="pr-3 text-gray-600">Time Slot</label>
-                            <select
-                                name="appointmentTime"
-                                value={appointment.appointmentTime}
-                                onChange={handleChange}
-                                className="border-2 border-gray-300 w-full h-8 sm:w-full rounded-lg pl-2 transition-colors duration-300 focus:outline-none focus:border-cyan-400"
-                            >
-                                <option value="">Select a Time Slot</option>
-                                {timeSlots.map((slot, index) => (
-                                    <option key={index} value={slot}>
-                                        {slot}
-                                    </option>
-                                ))}
-                            </select>
-                        </div>
-                        <div>
-                            <label className="pr-3 text-gray-600">Appointment Date</label>
-                            <DatePicker
-                                selected={selectedDate}
-                                onChange={handleDateChange}
-                                dateFormat="yyyy-MM-dd"
-                                className="border-2 border-gray-300 w-[168px] sm:w-[100%] h-8 rounded-lg p-4 transition-colors duration-300 focus:outline-none focus:border-cyan-400"
-                            />
-                        </div>
+                    <div className="flex gap-6 p-2 items-center">
+                        <label className="pr-3 text-gray-600">NIC</label>
+                        <input
+                            type="text"
+                            name="nic"
+                            value={appointment.nic}
+                            onChange={handleChange}
+                            className="border-2 border-gray-300 w-full sm:w-full h-8 rounded-lg p-4 transition-colors duration-300 focus:outline-none focus:border-cyan-400"
+                        />
+                    </div>
+                    <div className="flex gap-6 p-2 items-center">
+                        <label className="pr-3 text-gray-600">Birthday</label>
+                        <DatePicker
+                            selected={selectedBirthday}
+                            onChange={handleBirthdayChange}
+                            className="border-2 border-gray-300 w-full h-8 sm:w-full rounded-lg p-4 transition-colors duration-300 focus:outline-none focus:border-cyan-400"
+                            dateFormat="yyyy-MM-dd"
+                        />
+                    </div>
+                    <div className="flex gap-6 p-2 items-center">
+                        <label className="pr-3 text-gray-600">Appointment Date</label>
+                        <DatePicker
+                            selected={selectedDate}
+                            onChange={handleDateChange}
+                            className="border-2 border-gray-300 w-full h-8 sm:w-full rounded-lg p-4 transition-colors duration-300 focus:outline-none focus:border-cyan-400"
+                            dateFormat="yyyy-MM-dd"
+                        />
+                    </div>
+                    <div className="flex gap-6 p-2 items-center">
+                        <label className="pr-3 text-gray-600">Appointment Time</label>
+                        <select
+                            name="appointmentTime"
+                            value={appointment.appointmentTime}
+                            onChange={handleChange}
+                            className="border-2 border-gray-300 w-full h-8 sm:w-full rounded-lg pl-2 transition-colors duration-300 focus:outline-none focus:border-cyan-400"
+                        >
+                            <option value="">Select a Time Slot</option>
+                            {timeSlots.map((slot, index) => (
+                                <option key={index} value={slot}>{slot}</option>
+                            ))}
+                        </select>
                     </div>
                     <div className="flex gap-6 p-2 items-center">
                         <label className="pr-3 text-gray-600">Patient Index</label>
@@ -198,20 +393,26 @@ const AddAppointment = () => {
                             name="patientIndex"
                             value={appointment.patientIndex}
                             readOnly
-                            className="border-2 border-gray-300 w-full sm:w-full h-8 rounded-lg p-4 transition-colors duration-300 focus:outline-none focus:border-cyan-400"
+                            className="border-2 border-gray-300 w-full h-8 sm:w-full rounded-lg p-4 transition-colors duration-300 focus:outline-none focus:border-cyan-400"
                         />
                     </div>
                     {showAlert && (
                         <div className="text-center bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative">
-                            Please fill in all fields before submitting the form.
+                            {runtimeError ? runtimeError : "Please fill out all fields correctly!"}
                         </div>
                     )}
                     <div className="flex justify-between pt-2 xs:pt-6 gap-4">
-                        <button onClick={back} className="bg-red-500 w-full transition-colors duration-300 hover:bg-red-600 text-white font-bold py-2 rounded-lg">
-                            Back
-                        </button>
-                        <button type="submit" className="bg-blue-500 w-full transition-colors duration-300 hover:bg-blue-600 text-white font-bold py-2 rounded-lg">
+                        <button
+                            type="submit"
+                            className="bg-cyan-500 text-white py-2 px-4 rounded-lg mt-4 w-full transition-colors duration-300 hover:bg-cyan-600"
+                        >
                             Add Appointment
+                        </button>
+                        <button
+                            onClick={back}
+                            className="bg-gray-500 text-white py-2 px-4 rounded-lg mt-4 ml-4 w-full transition-colors duration-300 hover:bg-gray-600"
+                        >
+                            Back
                         </button>
                     </div>
                 </form>

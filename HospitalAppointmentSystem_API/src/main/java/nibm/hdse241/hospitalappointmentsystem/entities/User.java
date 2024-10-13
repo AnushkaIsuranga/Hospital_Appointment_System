@@ -2,6 +2,8 @@ package nibm.hdse241.hospitalappointmentsystem.entities;
 
 import jakarta.persistence.*;
 
+import java.time.LocalDateTime;
+
 @Entity
 @Table(name = "users")
 public class User {
@@ -16,9 +18,16 @@ public class User {
     private String role;
 
     // Optional fields for additional bio data
-    private String address;
+    private String nic;
     private String phone;
     private String birthday;
+
+    @Column(name = "registration_date")
+    private LocalDateTime registrationDate;
+
+    public User() {
+
+    }
 
     public Long getId() {
         return id;
@@ -68,14 +77,6 @@ public class User {
         this.role = role;
     }
 
-    public String getAddress() {
-        return address;
-    }
-
-    public void setAddress(String address) {
-        this.address = address;
-    }
-
     public String getPhone() {
         return phone;
     }
@@ -90,5 +91,21 @@ public class User {
 
     public void setBirthday(String birthday) {
         this.birthday = birthday;
+    }
+
+    public String getNic() {
+        return nic;
+    }
+
+    public void setNic(String nic) {
+        this.nic = nic;
+    }
+
+    public LocalDateTime getRegistrationDate() {
+        return registrationDate;
+    }
+
+    public void setRegistrationDate(LocalDateTime registrationDate) {
+        this.registrationDate = registrationDate;
     }
 }

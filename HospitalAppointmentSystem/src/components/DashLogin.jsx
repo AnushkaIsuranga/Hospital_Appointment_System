@@ -42,7 +42,7 @@ const DashLogin = () => {
             const result = await login(email, password);
             // Handle successful login (e.g., redirect to dashboard)
             console.log('Login successful:', result);
-            navigate('/appointment-dash');
+            navigate('/dashboard');
         } catch (error) {
             // Handle login failure
             setError('Invalid credentials or access denied.'); // Customize error message based on the response

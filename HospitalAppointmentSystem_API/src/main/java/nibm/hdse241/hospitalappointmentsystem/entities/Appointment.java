@@ -16,6 +16,13 @@ public class Appointment {
     private String appointmentTime;
     private String appointmentDate;
     private boolean isCanceled;
+    private String nic;
+    private String birthday;
+
+    @ManyToOne(fetch = FetchType.EAGER)
+    @JoinColumn(name = "user_id", referencedColumnName = "id")
+    private User user;
+
 
     public Appointment() {
         id = 0;
@@ -100,7 +107,29 @@ public class Appointment {
         this.isCanceled = setCanceled;
     }
 
+    public User getUser() {
+        return user;
+    }
 
+    public String getNic() {
+        return nic;
+    }
+
+    public void setNic(String nic) {
+        this.nic = nic;
+    }
+
+    public String getBirthday() {
+        return birthday;
+    }
+
+    public void setBirthday(String birthday) {
+        this.birthday = birthday;
+    }
+
+    public void setUser(User user) {
+        this.user = user;
+    }
 
     public void updateFrom(Appointment newAppointment) {
         this.patientIndex = newAppointment.getPatientIndex();
@@ -111,5 +140,7 @@ public class Appointment {
         this.appointmentTime = newAppointment.getAppointmentTime();
         this.appointmentDate = newAppointment.getAppointmentDate();
         this.isCanceled = newAppointment.isCanceled();
+        this.nic = newAppointment.getNic();
+        this.birthday = newAppointment.getBirthday();
     }
 }

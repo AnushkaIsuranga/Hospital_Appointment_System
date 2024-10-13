@@ -6,7 +6,7 @@ import Doc3 from '../assets/imgDoc3.jpeg'
 const Doctors = () => {
   return (
     <section id="doctors" className="py-12 px-5 text-center scroll-mt-16">
-      <h2 className="text-3xl font-bold mb-14">Meet Our Doctors</h2>
+      <h2 className="text-3xl font-bold mb-14">Meet Our Special Doctors</h2>
       <div className='flex justify-around flex-wrap mt-5'>
         <div className="text-center transition-transform sm:hover-scale-up">
           <div className='rounded-full bg-no-repeat mx-auto bg-cover h-[150px] w-[150px] hover:shadow-lg transition-shadow duration-300' style={{backgroundImage: `url(${Doc1})`, backgroundSize: 'cover', backgroundPosition: 'center',}}></div>

@@ -2,10 +2,12 @@ import React, { useEffect, useState, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import html2pdf from 'html2pdf.js';
 import appointmentService from '../../services/appointmentService';
-import ActiveAppointments from './ActiveAppointments';
-import CanceledAppointments from './CanceledAppointments';
 import Statistics from './Statistics';
 import GenerateReport from './GenerateReport';
+import DoctorDetails from './DoctorDetails';
+import UserDetails from './UserDetails';
+import Appointments from './Appointments';
+import PersonalDetails from './PersonalDetails';
 
 function Dashboard() {
     // State for active and canceled appointments
@@ -139,34 +141,9 @@ function Dashboard() {
             </div>
 
             <Statistics />
-            <div className="flex mt-5 border-b border-gray-300 ml-10 mr-10">
-                <button
-                    onClick={() => setActiveTab('active')}
-                    className={`py-2 px-4 text-lg font-semibold ${
-                        activeTab === 'active'
-                            ? 'border-b-2 border-blue-500 transition-colors duration-300 text-blue-600'
-                            : 'text-gray-600'
-                    }`}
-                >
-                    Available Appointments
-                </button>
-                <button
-                    onClick={() => setActiveTab('canceled')}
-                    className={`py-2 px-4 text-lg font-semibold ${
-                        activeTab === 'canceled'
-                            ? 'border-b-2 border-blue-500 transition-colors duration-300 text-blue-600'
-                            : 'text-gray-600'
-                    }`}
-                >
-                    Canceled Appointments
-                </button>
-            </div>
-            <div className="mt-4">
-                {/* Render the appropriate component based on the active tab */}
-                {activeTab === 'active' && <ActiveAppointments />}
-                {activeTab === 'canceled' && <CanceledAppointments canceledAppointments={canceledAppointments} replaceAppointment={replaceAppointment} />}
-            </div>
-
+            <Appointments />
+            <PersonalDetails />
+            
             {error && <div className="error-message">{error}</div>} {/* Display error message if any */}
 
             {/* Hidden content for PDF generation */}

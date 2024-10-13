@@ -103,6 +103,20 @@ class AppointmentService {
     getCanceledAppointmentsByTimeSlot() {
         return axios.get(`${API_URL}/canceled/by_time_slot`);
     }
+
+    // Retrieve available time slots for a specific doctor by doctor ID.
+    getTimeSlotsByDoctor(doctorId) {
+        return axios.get(`${API_URL}/time_slots`, {
+            params: {
+                doctorId: doctorId
+            }
+        });
+    }
+
+    // Retrieve the list of doctors.
+    getDoctors() {
+        return axios.get(`http://localhost:8080/api/doctors`);
+    }
 }
 
 // Export an instance of AppointmentService.

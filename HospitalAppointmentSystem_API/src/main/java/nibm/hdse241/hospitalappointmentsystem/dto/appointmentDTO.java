@@ -10,8 +10,10 @@ public class appointmentDTO {
     private String appointmentTime;
     private String appointmentDate;
     private boolean appointmentStatus;
+    private String nic;
+    private String birthday;
     public appointmentDTO() {
-        id = 0; patientName = ""; doctorName = ""; patientMobile = ""; patientEmail = ""; appointmentTime = ""; appointmentDate = ""; appointmentStatus = false;
+        id = 0; patientName = ""; doctorName = ""; patientMobile = ""; patientEmail = ""; appointmentTime = ""; appointmentDate = ""; appointmentStatus = false; nic=""; birthday="";
     }
 
     public int getId() {
@@ -84,5 +86,21 @@ public class appointmentDTO {
 
     public void setAppointmentStatus(boolean appointmentStatus) {
         this.appointmentStatus = appointmentStatus;
+    }
+
+    public String getNic() {
+        return nic;
+    }
+
+    public void setNic(String nic) {
+        this.nic = nic;
+    }
+
+    public String getBirthday() {
+        return birthday;
+    }
+
+    public void setBirthday(String birthday) {
+        this.birthday = birthday;
     }
 }

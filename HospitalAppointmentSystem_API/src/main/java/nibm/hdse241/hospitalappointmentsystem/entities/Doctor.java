@@ -14,6 +14,7 @@ public class Doctor {
     private String name;
     private String specialization;
     private String email;
+    private String nic;
 
     @ElementCollection
     @CollectionTable(name = "doctor_time_slots", joinColumns = @JoinColumn(name = "doctor_id"))
@@ -69,5 +70,13 @@ public class Doctor {
 
     public void setEmail(String email) {
         this.email = email;
+    }
+
+    public String getNic() {
+        return nic;
+    }
+
+    public void setNic(String nic) {
+        this.nic = nic;
     }
 }

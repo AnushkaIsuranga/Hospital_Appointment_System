@@ -6,6 +6,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.Optional;
+
 @RestController
 @RequestMapping("/api/auth")
 @CrossOrigin(origins = "http://localhost:5173")
@@ -19,18 +21,22 @@ public class authController {
         System.out.println("Received login request: " + loginRequest); // Log the request
 
         // Fetch user by email
-        User user = userService.findByEmail(loginRequest.getEmail());
-        if (user == null || !loginRequest.getPassword().equals(user.getPassword())) {
+        Optional<User> userOptional = userService.findUserByEmail(loginRequest.getEmail());
+
+        // Check if the user exists and the password matches
+        if (userOptional.isEmpty() || !loginRequest.getPassword().equals(userOptional.get().getPassword())) {
             // Return unauthorized response if login credentials are incorrect
             return ResponseEntity.status(401).body("Invalid credentials");
         }
 
-        // Check if the user has admin role
+        User user = userOptional.get();
+
+        // Check if the user has the admin role
         if (!user.getRole().equals("admin")) {
             return ResponseEntity.status(403).body("Access denied: Admins only");
         }
 
-        // If login is successful, return a response with user role and message
+        // If login is successful, return a response with the user's role and a success message
         return ResponseEntity.ok(new LoginResponse("Login successful", user.getRole()));
     }
 
