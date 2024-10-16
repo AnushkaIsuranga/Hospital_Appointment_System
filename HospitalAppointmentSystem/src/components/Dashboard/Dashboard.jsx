@@ -110,6 +110,8 @@ function Dashboard() {
         html2pdf().set(options).from(element).save();
     };
 
+
+
     return (
         <div className="relative">
             <div className="fixed top-0 left-0 w-full bg-slate-500 p-5 sm:pl-14 sm:pr-14 flex flex-col sm:flex-row justify-between items-center m-0 z-50">

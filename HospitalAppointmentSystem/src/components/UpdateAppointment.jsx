@@ -39,12 +39,15 @@ const EditAppointment = () => {
             .catch(error => console.error("Error fetching doctors:", error));
     }, []);
 
-    const getNextIndex = (existingCount, appointmentTime) => {
-        const [time, period] = appointmentTime.split(' '); 
-        const hour = parseInt(time.split(':')[0]); 
-        const slotNumber = hour > 12 ? hour - 12 : hour; 
-        const paddedCount = String(existingCount).padStart(2, '0'); 
-        return `P${slotNumber}-${paddedCount}`;
+    // This function generates a patient index based on doctor and appointment time
+    const generatePatientIndex = (appointmentTime, doctorName) => {
+        if (!appointmentTime || !doctorName) return '';
+
+        const [time, period] = appointmentTime.split(' ');
+        const hour = parseInt(time.split(':')[0]);
+        const slotNumber = hour > 12 ? hour - 12 : hour;
+        const paddedCount = String(Math.floor(Math.random() * 100)).padStart(2, '0'); // Random example count
+        return `P${slotNumber}-${paddedCount}`; // Format as P[hour]-[count]
     };
 
     // Fetch the appointment data on component mount
@@ -76,16 +79,10 @@ const EditAppointment = () => {
     // Handle changes in input fields
     const handleChange = (e) => {
         const { name, value } = e.target;
-        setAppointment((prev) => {
-            const updatedAppointment = { ...prev, [name]: value };
-
-            // Update patient index if doctor or time changes
-            if (name === "appointmentTime" || name === "doctorName") {
-                updatePatientIndex(updatedAppointment.appointmentTime, updatedAppointment.doctorName);
-            }
-
-            return updatedAppointment;
-        });
+        setAppointment((prev) => ({
+            ...prev,
+            [name]: value,
+        }));
     };
 
     // Handle changes in the doctor selection
@@ -100,23 +97,16 @@ const EditAppointment = () => {
 
         const doctor = doctors.find(doc => doc.name === selectedDoctor);
         setTimeSlots(doctor ? doctor.timeSlots : []);
-        updatePatientIndex(appointment.appointmentTime, selectedDoctor);
     };
 
-    // Update patient index based on time and doctor
-    const updatePatientIndex = async (time, doctorName) => {
-        if (time && doctorName) {
-            try {
-                const response = await appointmentService.getAppointmentCount(doctorName, time); // Fetch count for the doctor and time slot
-                const count = response.data;
-                const newPatientIndex = getNextIndex(count, time);
-                setAppointment(prev => ({ ...prev, patientIndex: newPatientIndex }));
-            } catch (error) {
-                console.error("Error fetching appointment count:", error);
-            }
-        } else {
-            setAppointment(prev => ({ ...prev, patientIndex: "" })); // Clear index if no valid time or doctor
-        }
+    // Handle changes in the time slot selection
+    const handleTimeSlotChange = (e) => {
+        const selectedTimeSlot = e.target.value;
+        setAppointment((prev) => ({
+            ...prev,
+            appointmentTime: selectedTimeSlot,
+            patientIndex: generatePatientIndex(selectedTimeSlot, appointment.doctorName) // Generate patient index
+        }));
     };
 
     // Handle changes in the date picker
@@ -185,7 +175,7 @@ const EditAppointment = () => {
                             <select
                                 name="appointmentTime"
                                 value={appointment.appointmentTime}
-                                onChange={handleChange}
+                                onChange={handleTimeSlotChange}
                                 className="border-2 border-gray-300 w-full pl-2 sm:w-full h-7 rounded-lg transition-colors duration-300 focus:outline-none focus:border-cyan-400"
                             >
                                 <option value="">Select a Time Slot</option>
@@ -204,8 +194,8 @@ const EditAppointment = () => {
                                 type="text"
                                 name="patientIndex"
                                 value={appointment.patientIndex}
-                                className="border-2 border-gray-300 w-full h-7 pl-2 rounded-lg transition-colors duration-300 focus:outline-none focus:border-cyan-400 "
                                 readOnly
+                                className="border-2 border-gray-300 w-full sm:w-full pl-2 h-7 rounded-lg transition-colors duration-300 focus:outline-none focus:border-cyan-400"
                             />
                         </div>
                         <div>
@@ -214,32 +204,30 @@ const EditAppointment = () => {
                                 selected={selectedDate}
                                 onChange={handleDateChange}
                                 dateFormat="yyyy-MM-dd"
-                                className="border-2 border-gray-300 w-[168px] pl-2 sm:w-[100%] rounded-lg transition-colors duration-300 focus:outline-none focus:border-cyan-400"
+                                className="border-2 border-gray-300 w-full sm:w-full pl-2 h-7 rounded-lg transition-colors duration-300 focus:outline-none focus:border-cyan-400"
                             />
                         </div>
                     </div>
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4 p-2">
-                    </div>
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4 p-2">
+
+                    {showAlert && (
+                        <div className="text-center bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative">Please fill in all required fields.</div>
+                    )}
+
+                    <div className="flex justify-between pt-2 xs:pt-6 gap-4">
                         <button
                             type="submit"
-                            className="w-full py-2 font-bold bg-cyan-400 text-white rounded-md transition duration-300 hover:bg-cyan-500"
+                            className="bg-cyan-500 text-white py-2 px-4 rounded-lg mt-4 w-full transition-colors duration-300 hover:bg-cyan-600"
                         >
-                            Update
+                            Update Appointment
                         </button>
                         <button
-                            className="w-full py-2 font-bold bg-gray-300 text-gray-700 rounded-md transition duration-300 hover:bg-gray-400"
+                            type="button"
                             onClick={back}
+                            className="bg-gray-500 text-white py-2 px-4 rounded-lg mt-4 ml-4 w-full transition-colors duration-300 hover:bg-gray-600"
                         >
-                            Cancel
+                            Back
                         </button>
                     </div>
-                    {showAlert && (
-                        <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative mt-4" role="alert">
-                            <strong className="font-bold">Error!</strong>
-                            <span className="block sm:inline"> All fields are required.</span>
-                        </div>
-                    )}
                 </form>
             </div>
         </div>

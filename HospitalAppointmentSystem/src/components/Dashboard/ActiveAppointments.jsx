@@ -251,14 +251,14 @@ const ActiveAppointments = () => {
 
       {/* Success alert for canceling an appointment */}
       {showAlertCancel && (
-        <div className="bg-blue-500 text-white px-4 py-2 rounded-md mt-4 fixed bottom-10 right-10 shadow-md">
+        <div className="bg-yellow-500 px-4 py-2 rounded-md mt-4 fixed bottom-10 right-10 shadow-md">
           <p>Appointment with ID {canceledAppointmentId} has been canceled!</p>
         </div>
       )}
       
       {/* Success alert for deleting an appointment */}
       {showAlertDelete && (
-        <div className="bg-blue-500 text-white px-4 py-2 rounded-md mt-4 fixed bottom-10 right-10 shadow-md">
+        <div className="bg-red-500 text-white px-4 py-2 rounded-md mt-4 fixed bottom-10 right-10 shadow-md">
           <p>Appointment with ID {deletedAppointmentId} has been deleted!</p>
         </div>
       )}
