@@ -11,7 +11,7 @@ const Navbar = () => {
           </a>
         </li>
         <li className='inline'>
-          <a className='ml-1 mr-1 sm:ml-5 font-semibold text-xs sm:text-base transition duration-300 ease-in-out hover:text-cyan-300' href="#services">
+          <a className='ml-1 mr-1 sm:ml-5  sm:mr-5 font-semibold text-xs sm:text-base transition duration-300 ease-in-out hover:text-cyan-300' href="#services">
             Services
           </a>
         </li>
@@ -21,7 +21,7 @@ const Navbar = () => {
           </a>
         </li>
         <li className='inline'>
-          <a className='ml-1 sm:ml-5 font-semibold text-xs sm:text-base transition duration-300 ease-in-out hover:text-cyan-300' href="#contact">
+          <a className='ml-1 mr-1 sm:ml-5 sm:mr-10 font-semibold text-xs sm:text-base transition duration-300 ease-in-out hover:text-cyan-300' href="#contact">
             Contact
           </a>
         </li>

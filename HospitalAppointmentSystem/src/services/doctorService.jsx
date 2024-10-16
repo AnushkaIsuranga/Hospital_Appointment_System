@@ -20,7 +20,12 @@ class DoctorService {
     }
 
     // Get a specific doctor by ID
-    getDoctorById(id) {
+    getDoctorById(nic) {
+        return axios.get(`${API_URL}/${nic}`);
+    }
+
+    // Get a specific doctor by ID
+    getDoctorByNic(id) {
         return axios.get(`${API_URL}/${id}`);
     }
 

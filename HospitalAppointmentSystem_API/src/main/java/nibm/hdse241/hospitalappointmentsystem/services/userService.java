@@ -34,7 +34,7 @@ public class userService {
     }
 
     // Find user by NIC
-    public Optional<User> findUserByNic(String nic) {
+    public List<User> findUserByNic(String nic) {
         return userRepository.findByNic(nic);
     }
 
@@ -45,19 +45,18 @@ public class userService {
 
     // Check if the NIC exists and compare details
     public String registerOrValidateUser(User newUser) {
-        Optional<User> existingUserOpt = userRepository.findByNic(newUser.getNic());
+        List<User> existingUsers = userRepository.findByNic(newUser.getNic());
 
-        if (existingUserOpt.isPresent()) {
-            User existingUser = existingUserOpt.get();
-
-            // Compare the personal data with the existing user
-            if (!existingUser.getFullName().equals(newUser.getFullName()) ||
-                    !existingUser.getEmail().equals(newUser.getEmail()) ||
-                    !existingUser.getPhone().equals(newUser.getPhone())) {
-                return "Personal data mismatch for the provided NIC!";
+        if (!existingUsers.isEmpty()) {
+            for (User existingUser : existingUsers) {
+                // Compare the personal data with each existing user
+                if (existingUser.getFullName().equals(newUser.getFullName()) &&
+                        existingUser.getEmail().equals(newUser.getEmail()) &&
+                        existingUser.getPhone().equals(newUser.getPhone())) {
+                    return "User already registered.";
+                }
             }
-
-            return "User already registered.";
+            return "Personal data mismatch for the provided NIC!";
         }
 
         // If the user does not exist, create a new user with a generated username

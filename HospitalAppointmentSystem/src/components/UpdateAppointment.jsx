@@ -4,6 +4,7 @@ import DatePicker from 'react-datepicker';
 import 'react-datepicker/dist/react-datepicker.css';
 import appointmentService from '../services/appointmentService';
 import background from '../assets/image4.jpg';
+import doctorService from "../services/doctorService";
 
 const EditAppointment = () => {
     const { id } = useParams(); // Get the appointment ID from the URL parameters
@@ -13,22 +14,15 @@ const EditAppointment = () => {
     const [appointment, setAppointment] = useState({
         id: "",
         doctorName: "",
-        patientMobile: "",
-        patientEmail: "",
         appointmentTime: "",
         appointmentDate: "",
+        patientIndex: ""
     });
 
     const [timeSlots, setTimeSlots] = useState([]); // State for available time slots
     const [selectedDate, setSelectedDate] = useState(null); // State for the selected date
     const [showAlert, setShowAlert] = useState(false); // State for showing an alert message
-
-    // Available doctors and their respective time slots
-    const doctors = {
-        "Dr. Smith": ["9am - 10am", "11am - 12pm", "2pm - 3pm"],
-        "Dr. Johnson": ["10am - 11am", "1pm - 2pm", "3pm - 4pm"],
-        "Dr. Williams": ["8am - 9am", "12pm - 1pm", "4pm - 5pm"]
-    };
+    const [doctors, setDoctors] = useState([]); // List of doctors
 
     // Style for the background image
     const backgroundStyle = {
@@ -37,6 +31,20 @@ const EditAppointment = () => {
         backgroundPosition: 'center',
         height: '100vh',
         width: '100%',
+    };
+
+    useEffect(() => {
+        doctorService.getDoctors()
+            .then(response => setDoctors(response.data))
+            .catch(error => console.error("Error fetching doctors:", error));
+    }, []);
+
+    const getNextIndex = (existingCount, appointmentTime) => {
+        const [time, period] = appointmentTime.split(' '); 
+        const hour = parseInt(time.split(':')[0]); 
+        const slotNumber = hour > 12 ? hour - 12 : hour; 
+        const paddedCount = String(existingCount).padStart(2, '0'); 
+        return `P${slotNumber}-${paddedCount}`;
     };
 
     // Fetch the appointment data on component mount
@@ -55,26 +63,60 @@ const EditAppointment = () => {
 
                 // If a doctor is selected, update the available time slots
                 if (appointmentData.doctorName) {
-                    setTimeSlots(doctors[appointmentData.doctorName] || []);
+                    const selectedDoctor = doctors.find(doc => doc.name === appointmentData.doctorName);
+                    setTimeSlots(selectedDoctor ? selectedDoctor.timeSlots : []);
                 }
             } catch (error) {
                 console.error('Error fetching appointment:', error);
             }
         };
         fetchData();
-    }, [id]); // Dependency array to run the effect only when the ID changes
+    }, [id, doctors]); // Dependency array to run the effect only when the ID or doctors list changes
 
     // Handle changes in input fields
     const handleChange = (e) => {
         const { name, value } = e.target;
-        setAppointment((prev) => ({ ...prev, [name]: value })); // Update the appointment state
+        setAppointment((prev) => {
+            const updatedAppointment = { ...prev, [name]: value };
+
+            // Update patient index if doctor or time changes
+            if (name === "appointmentTime" || name === "doctorName") {
+                updatePatientIndex(updatedAppointment.appointmentTime, updatedAppointment.doctorName);
+            }
+
+            return updatedAppointment;
+        });
     };
 
     // Handle changes in the doctor selection
     const handleDoctorChange = (e) => {
         const selectedDoctor = e.target.value;
-        setAppointment((prev) => ({ ...prev, doctorName: selectedDoctor })); // Update the doctor name in the appointment
-        setTimeSlots(doctors[selectedDoctor] || []); // Update the available time slots
+        setAppointment((prev) => ({
+            ...prev,
+            doctorName: selectedDoctor,
+            appointmentTime: "",
+            patientIndex: ""
+        }));
+
+        const doctor = doctors.find(doc => doc.name === selectedDoctor);
+        setTimeSlots(doctor ? doctor.timeSlots : []);
+        updatePatientIndex(appointment.appointmentTime, selectedDoctor);
+    };
+
+    // Update patient index based on time and doctor
+    const updatePatientIndex = async (time, doctorName) => {
+        if (time && doctorName) {
+            try {
+                const response = await appointmentService.getAppointmentCount(doctorName, time); // Fetch count for the doctor and time slot
+                const count = response.data;
+                const newPatientIndex = getNextIndex(count, time);
+                setAppointment(prev => ({ ...prev, patientIndex: newPatientIndex }));
+            } catch (error) {
+                console.error("Error fetching appointment count:", error);
+            }
+        } else {
+            setAppointment(prev => ({ ...prev, patientIndex: "" })); // Clear index if no valid time or doctor
+        }
     };
 
     // Handle changes in the date picker
@@ -91,7 +133,7 @@ const EditAppointment = () => {
         e.preventDefault(); // Prevent default form submission behavior
 
         // Validate required fields
-        if (!appointment.patientName || !appointment.doctorName || !appointment.patientMobile || !appointment.patientEmail || !appointment.appointmentTime || !appointment.appointmentDate) {
+        if (!appointment.doctorName || !appointment.appointmentTime || !appointment.appointmentDate) {
             setShowAlert(true); // Show alert if validation fails
             setTimeout(() => {
                 setShowAlert(false);
@@ -102,7 +144,7 @@ const EditAppointment = () => {
         // Send the updated appointment data to the server
         appointmentService.updateAppointment(appointment, appointment.id)
             .then((response) => {
-                navigate("/appointment-dash"); // Navigate to the dashboard on success
+                navigate("/dashboard"); // Navigate to the dashboard on success
             })
             .catch((error) => {
                 console.error('Error updating appointment:', error);
@@ -112,7 +154,7 @@ const EditAppointment = () => {
     // Handle the back button to navigate back to the dashboard
     const back = (e) => {
         e.preventDefault();
-        navigate('/appointment-dash'); // Navigate back to the dashboard
+        navigate('/dashboard'); // Navigate back to the dashboard
     };
 
     return (
@@ -122,60 +164,29 @@ const EditAppointment = () => {
                 <form onSubmit={updateAppointment}>
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4 p-2">
                         <div className="w-lg">
-                            <label className="pr-3 text-gray-600">Patient Name</label>
-                            <input
-                                type="text"
-                                name="patientName"
-                                value={appointment.patientName}
-                                onChange={handleChange}
-                                className="border-2 border-gray-300 w-full sm:w-full rounded-lg transition-colors duration-300 focus:outline-none focus:border-cyan-400"
-                            />
-                        </div>
-                        <div className="w-lg">
                             <label className="pr-3 text-gray-600">Doctor Name</label>
                             <select
                                 name="doctorName"
                                 value={appointment.doctorName}
                                 onChange={handleDoctorChange}
-                                className="border-2 border-gray-300 w-full h-7 sm:w-full rounded-lg transition-colors duration-300 focus:outline-none focus:border-cyan-400"
+                                className="border-2 border-gray-300 w-full pl-2 h-7 sm:w-full rounded-lg transition-colors duration-300 focus:outline-none focus:border-cyan-400"
                             >
                                 <option value="">Select a Doctor</option>
-                                {Object.keys(doctors).map((doctor) => (
-                                    <option key={doctor} value={doctor}>
-                                        {doctor}
+                                {doctors.map((doctor) => (
+                                    <option key={doctor.id} value={doctor.name}>
+                                        {doctor.name}
                                     </option>
                                 ))}
                             </select>
                         </div>
-                    </div>
-                    <div className="flex gap-6 p-2">
-                        <label className="pr-3 text-gray-600">Mobile</label>
-                        <input
-                            type="text"
-                            name="patientMobile"
-                            value={appointment.patientMobile}
-                            onChange={handleChange}
-                            className="border-2 border-gray-300 w-full sm:w-full rounded-lg transition-colors duration-300 focus:outline-none focus:border-cyan-400"
-                        />
-                    </div>
-                    <div className="flex gap-6 p-2">
-                        <label className="pr-3 text-gray-600">Email</label>
-                        <input
-                            type="email"
-                            name="patientEmail"
-                            value={appointment.patientEmail}
-                            onChange={handleChange}
-                            className="border-2 border-gray-300 w-full sm:w-full rounded-lg transition-colors duration-300 focus:outline-none focus:border-cyan-400"
-                        />
-                    </div>
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4 p-2">
+                        
                         <div>
                             <label className="pr-3 text-gray-600">Time Slot</label>
                             <select
                                 name="appointmentTime"
                                 value={appointment.appointmentTime}
                                 onChange={handleChange}
-                                className="border-2 border-gray-300 w-full sm:w-full h-7 rounded-lg transition-colors duration-300 focus:outline-none focus:border-cyan-400"
+                                className="border-2 border-gray-300 w-full pl-2 sm:w-full h-7 rounded-lg transition-colors duration-300 focus:outline-none focus:border-cyan-400"
                             >
                                 <option value="">Select a Time Slot</option>
                                 {timeSlots.map((slot, index) => (
@@ -185,38 +196,52 @@ const EditAppointment = () => {
                                 ))}
                             </select>
                         </div>
+                    </div>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4 p-2">
+                        <div>
+                            <label className="pr-3 text-gray-600">Patient Index</label>
+                            <input
+                                type="text"
+                                name="patientIndex"
+                                value={appointment.patientIndex}
+                                className="border-2 border-gray-300 w-full h-7 pl-2 rounded-lg transition-colors duration-300 focus:outline-none focus:border-cyan-400 "
+                                readOnly
+                            />
+                        </div>
                         <div>
                             <label className="pr-3 text-gray-600">Appointment Date</label>
                             <DatePicker
                                 selected={selectedDate}
                                 onChange={handleDateChange}
                                 dateFormat="yyyy-MM-dd"
-                                className="border-2 border-gray-300 w-[168px] sm:w-[100%] rounded-lg transition-colors duration-300 focus:outline-none focus:border-cyan-400"
+                                className="border-2 border-gray-300 w-[168px] pl-2 sm:w-[100%] rounded-lg transition-colors duration-300 focus:outline-none focus:border-cyan-400"
                             />
                         </div>
                     </div>
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4 p-2">
+                    </div>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4 p-2">
                         <button
                             type="submit"
-                            className="w-full py-2 font-bold bg-cyan-400 text-white rounded-md transition-colors duration-300 hover:bg-cyan-700"
+                            className="w-full py-2 font-bold bg-cyan-400 text-white rounded-md transition duration-300 hover:bg-cyan-500"
                         >
                             Update
                         </button>
                         <button
-                            type="button"
+                            className="w-full py-2 font-bold bg-gray-300 text-gray-700 rounded-md transition duration-300 hover:bg-gray-400"
                             onClick={back}
-                            className="w-full py-2 font-bold bg-gray-600 text-white rounded-md transition-colors duration-300 hover:bg-gray-700"
                         >
-                            Back
+                            Cancel
                         </button>
                     </div>
+                    {showAlert && (
+                        <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative mt-4" role="alert">
+                            <strong className="font-bold">Error!</strong>
+                            <span className="block sm:inline"> All fields are required.</span>
+                        </div>
+                    )}
                 </form>
             </div>
-            {showAlert && (
-                <div className="fixed bottom-4 right-4 bg-red-500 text-white p-4 rounded-lg shadow-lg transition-opacity duration-300">
-                    <p>Please fill in all the required fields.</p>
-                </div>
-            )}
         </div>
     );
 };

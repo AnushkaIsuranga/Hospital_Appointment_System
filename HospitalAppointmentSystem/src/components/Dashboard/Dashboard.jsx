@@ -4,8 +4,6 @@ import html2pdf from 'html2pdf.js';
 import appointmentService from '../../services/appointmentService';
 import Statistics from './Statistics';
 import GenerateReport from './GenerateReport';
-import DoctorDetails from './DoctorDetails';
-import UserDetails from './UserDetails';
 import Appointments from './Appointments';
 import PersonalDetails from './PersonalDetails';
 
@@ -14,7 +12,6 @@ function Dashboard() {
     const [appointments, setAppointments] = useState([]);
     const [canceledAppointments, setCanceledAppointments] = useState([]);
     const [error, setError] = useState(''); // State for handling errors
-    const [activeTab, setActiveTab] = useState('active'); // State to toggle between active and canceled appointments
     const [isAuthenticated, setIsAuthenticated] = useState(localStorage.getItem('isAuthenticated') === 'true');
     const [role, setRole] = useState(localStorage.getItem('role'));
 
@@ -114,47 +111,47 @@ function Dashboard() {
     };
 
     return (
-        <div className='relative'>
-            
-            <div className='w-screen bg-slate-500 p-5 pl-14 pr-14 flex justify-between items-center m-0'>
-                <h1 className="text-4xl text-white font-bold mb-2">Dashboard</h1>
-                <div className='space-x-6'>
+        <div className="relative">
+            <div className="fixed top-0 left-0 w-full bg-slate-500 p-5 sm:pl-14 sm:pr-14 flex flex-col sm:flex-row justify-between items-center m-0 z-50">
+                <h1 className="text-2xl sm:text-4xl text-white font-bold mb-2">Dashboard</h1>
+                <div className="space-x-6">
                     <button 
-                        className="bg-blue-500 text-white py-2 px-4 rounded-lg hover:bg-blue-600 hover:font-bold transition-all duration-300 w-40 focus:outline-none focus:ring-2 focus:ring-blue-300"
+                        className="dash-nav_buttons"
                         onClick={generatePDF}
                     >
                         Generate Report 
                     </button>
                     <button 
-                        className="bg-blue-500 text-white py-2 px-4 rounded-lg hover:bg-blue-600 hover:font-bold transition-all duration-300 w-40 focus:outline-none focus:ring-2 focus:ring-blue-300"
+                        className="dash-nav_buttons"
                         onClick={doctorRegister}
                     >
                         Register Doctor
                     </button>
                     <button 
+                        className="bg-red-500 hover:bg-red-800 hover:font-bold transition-all duration-200 font-semibold h-10 text-white w-24 sm:px-4 py-2 rounded"
                         onClick={handleLogout} 
-                        className="bg-red-500 hover:bg-red-800 hover:font-bold transition-all duration-300 text-white w-24 px-4 py-2 rounded"
                     >
                         Logout
                     </button>
                 </div>
             </div>
+            <div className="pt-16">
+                <Statistics />
+                <Appointments />
+                <PersonalDetails />
+                
+                {error && <div className="error-message">{error}</div>} {/* Display error message if any */}
 
-            <Statistics />
-            <Appointments />
-            <PersonalDetails />
-            
-            {error && <div className="error-message">{error}</div>} {/* Display error message if any */}
-
-            {/* Hidden content for PDF generation */}
-            <div style={{ display: 'none' }}>
+                {/* Hidden content for PDF generation */}
+                <div style={{ display: 'none' }}>
                 <GenerateReport 
                     ref={reportRef}
                     totalAppointments={appointments.length}
                     canceledAppointments={canceledAppointments.length}
                 />
+                </div>
             </div>
-        </div>
+            </div>
     );
 }
 

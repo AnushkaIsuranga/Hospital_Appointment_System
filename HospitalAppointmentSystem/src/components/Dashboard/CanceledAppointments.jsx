@@ -109,7 +109,7 @@ const CanceledAppointments = () => {
             >
               <option value="">Select a Doctor</option>
               {doctorsList.map(doctor => (
-                <option key={doctor} value={doctor}>{doctor}</option>
+                <option key={doctor.id} value={doctor.id}>{doctor.name}</option>
               ))}
             </select>
           </div>

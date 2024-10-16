@@ -157,7 +157,7 @@ const ActiveAppointments = () => {
             >
               <option value="">Select a Doctor</option>
               {doctorsList.map((doctor) => (
-                <option key={doctor} value={doctor}>{doctor}</option>
+                <option key={doctor.id} value={doctor.di}>{doctor.name}</option>
               ))}
             </select>
           </div>

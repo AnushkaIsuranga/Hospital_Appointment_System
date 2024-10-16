@@ -9,7 +9,7 @@ const DoctorRegister = () => {
         specialization: "",
         doctorEmail: "",
         doctorMobile: "",
-        nic: "",
+        doctorNic: "",
         timeSlots: [],
     });
 
@@ -35,7 +35,7 @@ const DoctorRegister = () => {
         e.preventDefault();
     
         // Check if all required fields are filled
-        if (!doctor.doctorName || !doctor.specialization || !doctor.doctorEmail || !doctor.doctorMobile) {
+        if (!doctor.doctorName || !doctor.specialization || !doctor.doctorEmail || !doctor.doctorMobile || !doctor.doctorNic) {
             setShowAlert(true);
             setTimeout(() => {
                 setShowAlert(false);
@@ -49,6 +49,7 @@ const DoctorRegister = () => {
             specialization: doctor.specialization.trim(),
             email: doctor.doctorEmail.trim(),
             mobile: doctor.doctorMobile.trim(),
+            nic: doctor.doctorNic.trim(),
             timeSlots: doctor.timeSlots,
         };
     
@@ -103,7 +104,7 @@ const DoctorRegister = () => {
 
     const back = (e) => {
         e.preventDefault();
-        navigate(`/appointment-dash`);
+        navigate(`/dashboard`);
     };
 
     return (
@@ -128,7 +129,7 @@ const DoctorRegister = () => {
                                 name="specialization"
                                 value={doctor.specialization}
                                 onChange={handleSpecializationChange}
-                                className="border-2 border-gray-300 w-full h-8 sm:w-full rounded-lg h-10 pl-4 transition-colors duration-300 focus:outline-none focus:border-cyan-400"
+                                className="border-2 border-gray-300 w-full h-8 sm:w-full rounded-lg pl-4 transition-colors duration-300 focus:outline-none focus:border-cyan-400"
                             >
                                 <option value="">Select Specialization</option>
                                 {specializationOptions.map((option, index) => (
@@ -163,15 +164,15 @@ const DoctorRegister = () => {
                         <label className="pr-3 text-gray-600">NIC</label>
                         <input
                             type="text"
-                            name="nic"
-                            value={doctor.nic}
+                            name="doctorNic"
+                            value={doctor.doctorNic}
                             onChange={handleChange}
                             className="border-2 border-gray-300 w-full sm:w-full h-8 rounded-lg p-4 transition-colors duration-300 focus:outline-none focus:border-cyan-400"
                             required
                         />
                     </div>
                     <div className="flex gap-6 p-2 items-center">
-                        <label className="pr-3 text-gray-600">Time Slots</label>
+                        <label className="text-gray-600">Time Slots</label>
                         <select
                             multiple
                             value={doctor.timeSlots}
@@ -199,11 +200,11 @@ const DoctorRegister = () => {
                         </div>
                     )}
                     <div className="flex justify-between pt-2 xs:pt-6 gap-4">
-                        <button onClick={back} className="bg-red-500 w-full transition-colors duration-300 hover:bg-red-600 text-white font-bold py-2 px-4 rounded">
-                            Back
-                        </button>
-                        <button type="submit" className="bg-cyan-500 w-full transition-colors duration-300 hover:bg-cyan-600 text-white font-bold py-2 px-4 rounded">
+                        <button type="submit" className="bg-cyan-500 text-white py-2 px-4 rounded-lg mt-4 w-full transition-colors duration-300 hover:bg-cyan-600">
                             Register Doctor
+                        </button>
+                        <button onClick={back} className="bg-gray-500 text-white py-2 px-4 rounded-lg mt-4 ml-4 w-full transition-colors duration-300 hover:bg-gray-600">
+                            Back
                         </button>
                     </div>
                 </form>

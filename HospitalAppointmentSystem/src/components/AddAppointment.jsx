@@ -15,7 +15,7 @@ const AddAppointment = () => {
         patientMobile: "",
         patientEmail: "",
         nic: "",
-        birthday: "",  // Added patientBirthday field
+        birthday: "", 
         appointmentTime: "",
         appointmentDate: "",
         patientIndex: "", 
@@ -24,11 +24,10 @@ const AddAppointment = () => {
 
     const [timeSlots, setTimeSlots] = useState([]);
     const [selectedDate, setSelectedDate] = useState(null);
-    const [selectedBirthday, setSelectedBirthday] = useState(null);  // Added selectedBirthday state
+    const [selectedBirthday, setSelectedBirthday] = useState(null);  
     const [showAlert, setShowAlert] = useState(false);
-    const [nicError, setNicError] = useState('');  // State to store NIC-related errors
-    const [runtimeError, setRuntimeError] = useState(''); // State to handle runtime errors
-    const [doctors, setDoctors] = useState([]); // State for doctors
+    const [runtimeError, setRuntimeError] = useState(''); 
+    const [doctors, setDoctors] = useState([]); 
     const navigate = useNavigate();
 
     const backgroundStyle = {
@@ -39,18 +38,12 @@ const AddAppointment = () => {
         width: '100%',
     };
 
-    // Fetch registered doctors on component mount
     useEffect(() => {
         doctorService.getDoctors()
-            .then(response => {
-                setDoctors(response.data);
-            })
-            .catch(error => {
-                console.error("Error fetching doctors:", error);
-            });
+            .then(response => setDoctors(response.data))
+            .catch(error => console.error("Error fetching doctors:", error));
     }, []);
 
-    // Function to generate the patient index based on the appointment time slot
     const getNextIndex = (existingCount, appointmentTime) => {
         const [time, period] = appointmentTime.split(' '); 
         const hour = parseInt(time.split(':')[0]); 
@@ -59,7 +52,6 @@ const AddAppointment = () => {
         return `P${slotNumber}-${paddedCount}`;
     };
 
-    // Update patient index based on appointment date and time
     useEffect(() => {
         if (appointment.appointmentDate && appointment.appointmentTime) {
             appointmentService.getAppointmentsByDateAndTime(appointment.appointmentDate, appointment.appointmentTime)
@@ -68,9 +60,7 @@ const AddAppointment = () => {
                     const nextIndex = getNextIndex(existingAppointments.length + 1, appointment.appointmentTime);
                     setAppointment(prev => ({ ...prev, patientIndex: nextIndex }));
                 })
-                .catch(error => {
-                    console.error("Error fetching appointments:", error);
-                });
+                .catch(error => console.error("Error fetching appointments:", error));
         }
     }, [appointment.appointmentDate, appointment.appointmentTime]);
 
@@ -102,41 +92,9 @@ const AddAppointment = () => {
         setAppointment((prev) => ({ ...prev, birthday: date.toISOString().split('T')[0] }));
     };
 
-    useEffect(() => {
-        const checkUserByNIC = async () => {
-            if (appointment.nic) {
-                try {
-                    const response = await userService.getUserByNic(appointment.nic);
-                    if (response.data) {
-                        const user = response.data;
-                        if (
-                            user.fullName !== appointment.patientName ||
-                            user.email !== appointment.patientEmail ||
-                            user.phone !== appointment.patientMobile ||
-                            user.birthday !== appointment.birthday
-                        ) {
-                            setNicError('Personal data mismatch for the provided NIC!');
-                        } else {
-                            setNicError('');
-                        }
-                    } else {
-                        setNicError('');
-                    }
-                } catch (error) {
-                    setNicError('');
-                }
-            } else {
-                setNicError('');
-            }
-        };
-
-        checkUserByNIC();
-    }, [appointment.nic, appointment.patientName, appointment.patientEmail, appointment.patientMobile, appointment.birthday]);
-
     const addAppointment = (e) => {
         e.preventDefault();
     
-        // Check for required fields
         if (
             !appointment.patientName ||
             !appointment.doctorName ||
@@ -149,36 +107,29 @@ const AddAppointment = () => {
         ) {
             setRuntimeError('Please fill in all required fields!');
             setShowAlert(true);
-            setTimeout(() => {
-                setShowAlert(false);
-            }, 5000);
+            setTimeout(() => setShowAlert(false), 5000);
             return;
         }
-    
-        // If NIC exists, fetch user data
+
+        // Check if NIC exists and handle user registration/appointment accordingly
         userService.getUserByNic(appointment.nic)
             .then(response => {
                 const user = response.data;
-    
-                // If user data exists
+
                 if (user) {
-                    // Check for data mismatch
                     if (
                         user.fullName !== appointment.patientName ||
                         user.email !== appointment.patientEmail ||
                         user.phone !== appointment.patientMobile ||
                         user.birthday !== appointment.birthday
                     ) {
-                        // Data mismatch, prevent adding the appointment
                         setRuntimeError('Personal data mismatch for the provided NIC!');
                         setShowAlert(true);
-                        setTimeout(() => {
-                            setShowAlert(false);
-                        }, 5000);
-                        return; // Prevent further execution if there is a mismatch
+                        setTimeout(() => setShowAlert(false), 5000);
+                        return;
                     }
-    
-                    // Data matches, proceed to add the appointment
+
+                    // Data matches, proceed to add appointment
                     const newAppointment = { ...appointment, isCanceled: false };
                     appointmentService.saveAppointment(newAppointment)
                         .then(async (response) => {
@@ -193,12 +144,10 @@ const AddAppointment = () => {
                             console.error('Error adding appointment:', error);
                             setRuntimeError('An unexpected error occurred while adding the appointment.');
                             setShowAlert(true);
-                            setTimeout(() => {
-                                setShowAlert(false);
-                            }, 5000);
+                            setTimeout(() => setShowAlert(false), 5000);
                         });
                 } else {
-                    // NIC does not exist, proceed to add the appointment and register the new user
+                    // NIC does not exist, register new user and add appointment
                     const newUser = {
                         fullName: appointment.patientName,
                         email: appointment.patientEmail,
@@ -206,11 +155,8 @@ const AddAppointment = () => {
                         birthday: appointment.birthday,
                         nic: appointment.nic
                     };
-    
-                    // Register the new user (make sure you have a service to handle this)
-                    userService.registerUser(newUser)  // Assuming you have a method for registering users
+                    userService.registerUser(newUser)
                         .then(() => {
-                            // After user registration, proceed to save the appointment
                             const newAppointment = { ...appointment, isCanceled: false };
                             appointmentService.saveAppointment(newAppointment)
                                 .then(async (response) => {
@@ -225,66 +171,24 @@ const AddAppointment = () => {
                                     console.error('Error adding appointment:', error);
                                     setRuntimeError('An unexpected error occurred while adding the appointment.');
                                     setShowAlert(true);
-                                    setTimeout(() => {
-                                        setShowAlert(false);
-                                    }, 5000);
+                                    setTimeout(() => setShowAlert(false), 5000);
                                 });
                         })
                         .catch((error) => {
                             console.error('Error registering user:', error);
                             setRuntimeError('An unexpected error occurred while registering the user.');
                             setShowAlert(true);
-                            setTimeout(() => {
-                                setShowAlert(false);
-                            }, 5000);
+                            setTimeout(() => setShowAlert(false), 5000);
                         });
                 }
             })
             .catch((error) => {
                 console.error('Error fetching user by NIC:', error);
-                // Proceed to add the appointment and register the new user
-                const newUser = {
-                    fullName: appointment.patientName,
-                    email: appointment.patientEmail,
-                    phone: appointment.patientMobile,
-                    birthday: appointment.birthday,
-                    nic: appointment.nic
-                };
-    
-                // Register the new user
-                userService.registerUser(newUser)
-                    .then(() => {
-                        // After user registration, proceed to save the appointment
-                        const newAppointment = { ...appointment, isCanceled: false };
-                        appointmentService.saveAppointment(newAppointment)
-                            .then(async (response) => {
-                                try {
-                                    await sendAppointmentEmail({ ...newAppointment, id: response.data.id });
-                                    navigate("/home");
-                                } catch (error) {
-                                    console.error('Error sending email:', error);
-                                }
-                            })
-                            .catch((error) => {
-                                console.error('Error adding appointment:', error);
-                                setRuntimeError('An unexpected error occurred while adding the appointment.');
-                                setShowAlert(true);
-                                setTimeout(() => {
-                                    setShowAlert(false);
-                                }, 5000);
-                            });
-                    })
-                    .catch((error) => {
-                        console.error('Error registering user:', error);
-                        setRuntimeError('An unexpected error occurred while registering the user.');
-                        setShowAlert(true);
-                        setTimeout(() => {
-                            setShowAlert(false);
-                        }, 5000);
-                    });
+                setRuntimeError('Error fetching user data.');
+                setShowAlert(true);
+                setTimeout(() => setShowAlert(false), 5000);
             });
     };
-    
     
     const back = (e) => {
         e.preventDefault();

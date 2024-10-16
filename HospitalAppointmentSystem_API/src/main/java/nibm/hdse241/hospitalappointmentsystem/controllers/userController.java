@@ -42,10 +42,10 @@ public class userController {
 
     // Find user by NIC
     @GetMapping("/nic/{nic}")
-    public ResponseEntity<User> getUserByNic(@PathVariable String nic) {
-        Optional<User> user = userService.findUserByNic(nic);
-        return user.map(ResponseEntity::ok).orElseGet(() -> ResponseEntity.notFound().build());
+    public List<User> getUserByNic(@PathVariable String nic) {
+        return userService.findUserByNic(nic);
     }
+
 
     // Find user by email
     @GetMapping("/email/{email}")
