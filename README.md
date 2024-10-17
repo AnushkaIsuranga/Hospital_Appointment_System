@@ -13,13 +13,18 @@ Before you begin, make sure you have the following software installed on your sy
 
 ## Getting Started
 
-### Step 1: Run the Backend API
+### Step 1: Run MySQL
+
+1. **Open XAMPP**
+2. Start `Apachi` server and `MySQL`.
+
+### Step 2: Run the Backend API
 
 1. **Open IntelliJ IDEA**.
 2. Navigate to the project directory and open the `HospitalAppointmentSystem_API` folder.
 3. Run the application by clicking on the `Run` button in IntelliJ IDEA or by using the `Shift + F10` shortcut.
 
-### Step 2: Run the Frontend Application
+### Step 3: Run the Frontend Application
 
 1. **Open Visual Studio Code**.
 2. Navigate to the project directory and open the `HospitalAppointmentSystem` folder.
@@ -34,7 +39,7 @@ Before you begin, make sure you have the following software installed on your sy
    ```
 6. Click on the link or paste it into your web browser.
 
-### Step 3: Access the Admin Panel
+### Step 4: Access the Admin Panel
 
 1. Once you are redirected to the homepage, the URL will look like this:
    ```
@@ -42,7 +47,7 @@ Before you begin, make sure you have the following software installed on your sy
    ```
 2. To access the admin panel, simply replace `/home` with `/appointment-dash` in the URL:
    ```
-   https://localhost:5173/appointment-dash
+   https://localhost:5173/dashboard
    ```
 
 You will now be redirected to the admin panel where you can manage appointments.
