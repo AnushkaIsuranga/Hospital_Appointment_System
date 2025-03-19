@@ -11,7 +11,9 @@ public class webConfig implements WebMvcConfigurer {
     @Override
     public void addCorsMappings(CorsRegistry registry) {
         registry.addMapping("/**")
-                .allowedOrigins("http://localhost:5173") // Allow your frontend origin
+                .allowedOrigins(Arrays.asList(
+                    "http://localhost:5173",
+                    "https://hospital-appointment-system-delta.vercel.app/")) // Allow your frontend origin
                 .allowedMethods("GET", "POST", "PUT", "DELETE")
                 .allowedHeaders("*")
                 .allowCredentials(true);

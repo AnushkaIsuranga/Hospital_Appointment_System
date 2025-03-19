@@ -1,4 +1,5 @@
 import './App.css'
+import React from 'react'
 import { compile } from "@fileforge/react-print";
 import { BrowserRouter, Route, Routes } from 'react-router-dom'
 import HomePage from './components/HomePage/HomePage.jsx'
@@ -15,7 +16,7 @@ function App() {
     <>
       <BrowserRouter>
         <Routes>
-          <Route index element={<HomePage/>} />
+          <Route path='/' element={<HomePage/>} />
           <Route path='/home' element={<HomePage/>} />
           <Route path='/report' element={<GeneratReport/>} />
           <Route element={<ProtectedRoute allowedRole="admin" />}>
